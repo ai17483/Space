@@ -8,16 +8,27 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <rg/Texture2D.h>
+#include <rg/Camera.h>
 
 void processInput(GLFWwindow *window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void update(GLFWwindow *window);
 void key_callback(GLFWwindow * window, int key, int scancode, int action, int mods);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
-glm::vec3 position;
+Camera camera;
+
+bool firstMouse = true;
+float lastX = 800.0f / 2.0;
+float lastY = 600.0f / 2.0;
+
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
+
 int main() {
 
     glfwInit();
@@ -34,6 +45,10 @@ int main() {
 
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
     glfwSetKeyCallback(window, key_callback);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -41,6 +56,8 @@ int main() {
         glfwTerminate();
         return EXIT_FAILURE;
     }
+
+    glEnable(GL_DEPTH_TEST);
 
     Shader shader("resources/shaders/vertexShader.vs", "resources/shaders/fragmentShader.fs");
 
@@ -88,6 +105,19 @@ int main() {
 
     };
 
+    glm::vec3 cubePositions[] = {
+            glm::vec3(0.0f, 0.0f, 0.0f),
+            glm::vec3(2.0f, 5.0f, -15.0f),
+            glm::vec3(-1.5f, -2.2f, -2.5f),
+            glm::vec3(-3.8f, -2.0f, -12.3f),
+            glm::vec3(2.4f, -0.4f, -3.5f),
+            glm::vec3(-1.7f, 3.0f, -7.5f),
+            glm::vec3(1.3f, -2.0f, -2.5f),
+            glm::vec3(1.5f, 2.0f, -2.5f),
+            glm::vec3(1.5f, 0.2f, -1.5f),
+            glm::vec3(-1.3f, 1.0f, -1.5f)
+    };
+
     unsigned int indices[] = {
             0, 1, 3,
             1, 2, 3
@@ -122,6 +152,10 @@ int main() {
     shader.setInt("t0", 0);
     shader.setInt("t1", 1);
 
+    camera.Position = glm::vec3(0,0,3);
+    camera.Front = glm::vec3(0,0,-1);
+    camera.WorldUp = glm::vec3(0,1,0);
+
     //oslobadjanje
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -129,36 +163,58 @@ int main() {
     //petlja za renderovanje
     while(!glfwWindowShouldClose(window)) {
 
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
         processInput(window);
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT); // postavljanje boje
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // postavljanje boje
 
         texture2D1.active(GL_TEXTURE0);
         texture2D2.active(GL_TEXTURE1);
 
-        glm::mat4 m = glm::mat4(1.0f);
-        m = glm::translate(m, position);
-        m = glm::rotate(m, (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));
-        m = glm::scale(m, glm::vec3(0.5, 0.5, 1.0));
+        //glm::mat4 m = glm::mat4(1.0f);
+        //m = glm::translate(m, position);
+        //m = glm::rotate(m, (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));
+        //m = glm::scale(m, glm::vec3(0.5, 0.5, 1.0));
 
 
         //crtanje trougla
         shader.use();
 
-        glm::mat4 model = glm::mat4(1.0f);
-        glm::mat4 view = glm::mat4(1.0f);
+        //glm::mat4 model = glm::mat4(1.0f);
+        //glm::mat4 view = glm::mat4(1.0f);
         glm::mat4 projection = glm::mat4(1.0f);
 
-        model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5, 1.0, 0.0));
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-        projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH/SCR_HEIGHT, 0.1f, 100.0f);
+        //glm::mat4 view = glm::mat4(1.0f);
+        //float radius = 10.0f;
+        //float camX = sin(glfwGetTime()) * radius;
+        //float camZ = cos(glfwGetTime()) * radius;
+        //view = glm::lookAt(glm::vec3(camX, 0.0f, camZ), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        //shader.setMat4("view", view);
 
-        shader.setMat4("model", model);
+
+
+        //model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5, 1.0, 0.0));
+        projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH/SCR_HEIGHT, 0.1f, 100.0f);
+        //view = glm::translate(view, glm::vec3(0.0f, 0.0f, -7.0f + 2*sin(glfwGetTime())));
+        glm::mat4 view = camera.GetViewMatrix();
+        //shader.setMat4("model", model);
         shader.setMat4("view", view);
         shader.setMat4("projection", projection);
         //shader.setMat4("m", m);
 
         glBindVertexArray(VAO);
+
+        for(int i = 0; i < 10; ++i){
+            glm::mat4 model = glm::mat4(1.0f);
+            float angle = 20.0f * i;
+            model = glm::translate(model, cubePositions[i]);
+            model = glm::rotate(model, glm:: radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            shader.setMat4("model", model);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
         glDrawArrays(GL_TRIANGLES, 0, 36);
         //glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
         update(window);
@@ -181,10 +237,13 @@ void processInput(GLFWwindow *window)
         glfwSetWindowShouldClose(window, true);
 
     if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        position.y += 0.05;
-
+        camera.ProcessKeyboard(FORWARD, deltaTime);
     if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        position.y -= 0.05;
+        camera.ProcessKeyboard(BACKWARD, deltaTime);
+    if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        camera.ProcessKeyboard(LEFT, deltaTime);
+    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        camera.ProcessKeyboard(RIGHT, deltaTime);
 }
 void update(GLFWwindow *window) {
 
@@ -209,9 +268,27 @@ void key_callback(GLFWwindow * window, int key, int scancode, int action, int mo
     }
 }
 
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
 
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos;
+    lastX = xpos;
+    lastY = ypos;
 
+    camera.ProcessMouseMovement(xoffset, yoffset);
+}
 
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    camera.ProcessMouseScroll(yoffset);
+}
 
 
 
