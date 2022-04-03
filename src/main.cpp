@@ -29,6 +29,9 @@ float lastY = 600.0f / 2.0;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
+glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+glm::vec3 lightColor = glm::vec3(0.7f, 1.0f, 0.25f);
+
 int main() {
 
     glfwInit();
@@ -36,7 +39,7 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow *window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "hello_window", nullptr, nullptr);
+    GLFWwindow *window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "space_walk", nullptr, nullptr);
     if (window == nullptr) {
         std::cout << "Failed to create a window!\n";
         glfwTerminate();
@@ -47,9 +50,8 @@ int main() {
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
     glfwSetKeyCallback(window, key_callback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cout << "Failed to init GLAD\n";
@@ -60,107 +62,90 @@ int main() {
     glEnable(GL_DEPTH_TEST);
 
     Shader shader("resources/shaders/vertexShader.vs", "resources/shaders/fragmentShader.fs");
+    Shader lightCube("resources/shaders/vertexShader1.vs", "resources/shaders/fragmentShader1.fs");
 
-    float vertices[] = {-0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-                        0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+
+    float vertices[] = {-0.5f, 0.5f,-0.5f, 0.0f, 0.0f,
+                        -0.5f, 0.5f,0.5f, 1.0f, 0.0f,
                         0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-                        0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-                        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
-                        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+                        0.5f, 0.5f, 0.5f, 0.0f, 1.0f,
 
-                        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-                        0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-                        0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-                        0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-                        -0.5f, 0.5f, 0.5f, 0.0f, 1.0f,
-                        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+                        -0.5f,-0.5f,-0.5f, 0.0f, 1.0f,
+                        -0.5f,-0.5f,0.5f, 1.0f, 1.0f,
+                        0.5f,-0.5f,-0.5f, 1.0f, 0.0f,
+                        0.5f,-0.5f, 0.5f, 0.0f, 0.0f
 
-                        -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-                        -0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-                        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-                        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-                        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-                        -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-
-                        0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-                        0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-                        0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-                        0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-                        0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-                        0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-
-                        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-                        0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
-                        0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-                        0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-                        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-                        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-
-                        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
-                        0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-                        0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-                        0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-                        -0.5f, 0.5f, 0.5f, 0.0f, 0.0f,
-                        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
-
-    };
-
-    glm::vec3 cubePositions[] = {
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(2.0f, 5.0f, -15.0f),
-            glm::vec3(-1.5f, -2.2f, -2.5f),
-            glm::vec3(-3.8f, -2.0f, -12.3f),
-            glm::vec3(2.4f, -0.4f, -3.5f),
-            glm::vec3(-1.7f, 3.0f, -7.5f),
-            glm::vec3(1.3f, -2.0f, -2.5f),
-            glm::vec3(1.5f, 2.0f, -2.5f),
-            glm::vec3(1.5f, 0.2f, -1.5f),
-            glm::vec3(-1.3f, 1.0f, -1.5f)
     };
 
     unsigned int indices[] = {
-            0, 1, 3,
-            1, 2, 3
+            0,1,2,
+            1,2,3,
+
+            4,5,6,
+            5,6,7,
+
+            0,1,5,
+            0,4,5,
+
+            2,3,7,
+            2,6,7,
+
+            0,2,6,
+            0,4,6,
+
+            1,5,7,
+            1,3,7
     };
-    //saljemo niz na graficku karticu
-    unsigned int VBO, VAO, EBO;
 
-    //ucitavanje iz ram memorije u memoriju graficke kartice
-    glGenVertexArrays(1, &VAO);
+    unsigned int VBO, VAO, EBO, cubeVAO;
+
     glGenBuffers(1, &VBO);
-    //glGenBuffers(1, &EBO);
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &EBO);
 
-    glBindVertexArray(VAO);
+
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    glBindVertexArray(VAO);
 
-    //definisemo sta znace koordinate koje smo poslali
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+
+
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5* sizeof(float), (void*)(3*sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    Texture2D texture2D1("resources/textures/container.jpg", GL_LINEAR, GL_REPEAT, GL_RGB);
-    Texture2D texture2D2("resources/textures/awesomeface.png", GL_LINEAR, GL_REPEAT, GL_RGBA);
+    glGenVertexArrays(1, &cubeVAO);
+    glBindVertexArray(cubeVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    Texture2D texture2D("resources/textures/space_background.bmp", GL_LINEAR, GL_REPEAT, GL_RGBA);
 
     shader.use();
     shader.setInt("t0", 0);
-    shader.setInt("t1", 1);
+
 
     camera.Position = glm::vec3(0,0,3);
     camera.Front = glm::vec3(0,0,-1);
     camera.WorldUp = glm::vec3(0,1,0);
 
-    //oslobadjanje
+
+
+
+
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    //petlja za renderovanje
     while(!glfwWindowShouldClose(window)) {
 
         float currentFrame = glfwGetTime();
@@ -168,63 +153,53 @@ int main() {
         lastFrame = currentFrame;
 
         processInput(window);
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // postavljanje boje
-
-        texture2D1.active(GL_TEXTURE0);
-        texture2D2.active(GL_TEXTURE1);
-
-        //glm::mat4 m = glm::mat4(1.0f);
-        //m = glm::translate(m, position);
-        //m = glm::rotate(m, (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));
-        //m = glm::scale(m, glm::vec3(0.5, 0.5, 1.0));
+        glfwPollEvents();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-        //crtanje trougla
+
+
+        texture2D.active(GL_TEXTURE0);
+
         shader.use();
 
-        //glm::mat4 model = glm::mat4(1.0f);
-        //glm::mat4 view = glm::mat4(1.0f);
-        glm::mat4 projection = glm::mat4(1.0f);
-
-        //glm::mat4 view = glm::mat4(1.0f);
-        //float radius = 10.0f;
-        //float camX = sin(glfwGetTime()) * radius;
-        //float camZ = cos(glfwGetTime()) * radius;
-        //view = glm::lookAt(glm::vec3(camX, 0.0f, camZ), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        //shader.setMat4("view", view);
-
-
-
-        //model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5, 1.0, 0.0));
-        projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH/SCR_HEIGHT, 0.1f, 100.0f);
-        //view = glm::translate(view, glm::vec3(0.0f, 0.0f, -7.0f + 2*sin(glfwGetTime())));
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH/SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
-        //shader.setMat4("model", model);
         shader.setMat4("view", view);
         shader.setMat4("projection", projection);
-        //shader.setMat4("m", m);
+        shader.setVec3("lightColor", lightColor);
 
         glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
-        for(int i = 0; i < 10; ++i){
-            glm::mat4 model = glm::mat4(1.0f);
-            float angle = 20.0f * i;
-            model = glm::translate(model, cubePositions[i]);
-            model = glm::rotate(model, glm:: radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            shader.setMat4("model", model);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        //glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
+
+
+        lightCube.use();
+
+
+        lightCube.setMat4("projection", projection);
+        lightCube.setMat4("view", view);
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, lightPos);
+        model = glm::scale(model, glm::vec3(0.2f));
+        lightCube.setMat4("model", model);
+        lightCube.setVec3("objectColor", glm::vec3(1.0f, 0.5f, 0.31f));
+        lightCube.setVec3("lightColor", lightColor);
+
+        glBindVertexArray(cubeVAO);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
+
+
         update(window);
         glfwSwapBuffers(window);
-        glfwPollEvents();
+
     }
 
-    glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    //glDeleteBuffers(1, &EBO);
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &EBO);
     shader.deleteProgram();
 
     glfwTerminate();
