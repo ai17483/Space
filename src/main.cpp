@@ -30,7 +30,7 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
-glm::vec3 lightColor = glm::vec3(0.7f, 1.0f, 0.25f);
+glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
 
 int main() {
 
@@ -65,19 +65,51 @@ int main() {
     Shader lightCube("resources/shaders/vertexShader1.vs", "resources/shaders/fragmentShader1.fs");
 
 
-    float vertices[] = {-0.5f, 0.5f,-0.5f, 0.0f, 0.0f,
-                        -0.5f, 0.5f,0.5f, 1.0f, 0.0f,
-                        0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-                        0.5f, 0.5f, 0.5f, 0.0f, 1.0f,
+    float vertices[] = {-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                        0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 
-                        -0.5f,-0.5f,-0.5f, 0.0f, 1.0f,
-                        -0.5f,-0.5f,0.5f, 1.0f, 1.0f,
-                        0.5f,-0.5f,-0.5f, 1.0f, 0.0f,
-                        0.5f,-0.5f, 0.5f, 0.0f, 0.0f
+                        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                        0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                        0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                        0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+
+                        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+                        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+                        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+                        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+                        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+                        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+
+                        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+                        0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+                        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+                        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+                        0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+                        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+
+                        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+                        0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+                        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+                        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+                        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+                        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+
+                        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+                        0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+                        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+                        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+                        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+                        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
 
     };
 
-    unsigned int indices[] = {
+    /*unsigned int indices[] = {
             0,1,2,
             1,2,3,
 
@@ -95,13 +127,13 @@ int main() {
 
             1,5,7,
             1,3,7
-    };
+    };*/
 
     unsigned int VBO, VAO, EBO, cubeVAO;
 
     glGenBuffers(1, &VBO);
     glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &EBO);
+    //glGenBuffers(1, &EBO);
 
 
 
@@ -110,28 +142,28 @@ int main() {
 
     glBindVertexArray(VAO);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5* sizeof(float), (void*)(3*sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6* sizeof(float), (void*)(3*sizeof(float)));
     glEnableVertexAttribArray(1);
 
     glGenVertexArrays(1, &cubeVAO);
     glBindVertexArray(cubeVAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    Texture2D texture2D("resources/textures/space_background.bmp", GL_LINEAR, GL_REPEAT, GL_RGBA);
+    //Texture2D texture2D("resources/textures/space_background.bmp", GL_LINEAR, GL_REPEAT, GL_RGBA);
 
     shader.use();
-    shader.setInt("t0", 0);
+    //shader.setInt("t0", 0);
 
 
     camera.Position = glm::vec3(0,0,3);
@@ -144,7 +176,7 @@ int main() {
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     while(!glfwWindowShouldClose(window)) {
 
@@ -159,18 +191,24 @@ int main() {
 
 
 
-        texture2D.active(GL_TEXTURE0);
+        //texture2D.active(GL_TEXTURE0);
 
         shader.use();
 
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH/SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
+
         shader.setMat4("view", view);
         shader.setMat4("projection", projection);
+        glm::mat4 model1 = glm::mat4(1.0f);
+        shader.setMat4("model1", model1);
         shader.setVec3("lightColor", lightColor);
+        shader.setVec3("lightPos", lightPos);
+        shader.setVec3("objectColor", glm::vec3(1.0f, 0.5f, 0.31f));
+        shader.setVec3("viewPos", camera.Position);
 
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
 
 
@@ -184,11 +222,11 @@ int main() {
         model = glm::translate(model, lightPos);
         model = glm::scale(model, glm::vec3(0.2f));
         lightCube.setMat4("model", model);
-        lightCube.setVec3("objectColor", glm::vec3(1.0f, 0.5f, 0.31f));
+        lightCube.setVec3("objectColor", glm::vec3(1.0f, 1.0f, 1.0f));
         lightCube.setVec3("lightColor", lightColor);
 
         glBindVertexArray(cubeVAO);
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
 
 
@@ -199,7 +237,7 @@ int main() {
 
     glDeleteBuffers(1, &VBO);
     glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &EBO);
+    //glDeleteBuffers(1, &EBO);
     shader.deleteProgram();
 
     glfwTerminate();
