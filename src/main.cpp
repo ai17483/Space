@@ -110,6 +110,19 @@ int main() {
 
     };
 
+    glm::vec3 cubePosition[] = {
+                glm::vec3( 0.0f,  0.0f,  0.0f),
+                glm::vec3( 2.0f,  5.0f, -15.0f),
+                glm::vec3(-1.5f, -2.2f, -2.5f),
+                glm::vec3(-3.8f, -2.0f, -12.3f),
+                glm::vec3( 2.4f, -0.4f, -3.5f),
+                glm::vec3(-1.7f,  3.0f, -7.5f),
+                glm::vec3( 1.3f, -2.0f, -2.5f),
+                glm::vec3( 1.5f,  2.0f, -2.5f),
+                glm::vec3( 1.5f,  0.2f, -1.5f),
+                glm::vec3(-1.3f,  1.0f, -1.5f)
+    };
+
     /*unsigned int indices[] = {
             0,1,2,
             1,2,3,
@@ -198,12 +211,6 @@ int main() {
         glfwPollEvents();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-
-
-        //texture2D.active(GL_TEXTURE0);
-        //texture2D1.active(GL_TEXTURE1);
-
         shader.use();
 
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH/SCR_HEIGHT, 0.1f, 100.0f);
@@ -211,9 +218,10 @@ int main() {
 
         shader.setMat4("view", view);
         shader.setMat4("projection", projection);
-        glm::mat4 model1 = glm::mat4(1.0f);
-        shader.setMat4("model1", model1);
-        shader.setVec3("light.lightPos", lightPos);
+        glm::mat4 model = glm::mat4(1.0f);
+        shader.setMat4("model", model);
+        shader.setVec3("light.position", lightPos);
+        //shader.setVec3("light.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
         shader.setVec3("viewPos", camera.Position);
 
         glm::vec3 lightColor(1.0f);
@@ -228,12 +236,27 @@ int main() {
         //shader.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
         //shader.setVec3("material.specular", glm::vec3(1.0f));
         shader.setFloat("material.shininess", 32);
+        shader.setFloat("light.constant", 1.0f);
+        shader.setFloat("light.linear", 0.09f);
+        shader.setFloat("light.quadratic", 0.032f);
+        shader.setVec3("light.position", camera.Position);
+        shader.setVec3("light.direction", camera.Front);
+        shader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
+        shader.setFloat("light.outerCutOff", glm::cos(glm::radians(16.5f)));
 
         texture2D.active(GL_TEXTURE0);
         texture2D1.active(GL_TEXTURE1);
 
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        //glDrawArrays(GL_TRIANGLES, 0, 36);
+        for (int i = 0; i < 10; ++i) {
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePosition[i]);
+            float angle = 20.0f * i;
+            model = glm::rotate(model, angle, glm::vec3(1.0f, 0.3f, 0.5f));
+            shader.setMat4("model", model);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
 
 
 
@@ -243,7 +266,7 @@ int main() {
 
         lightCube.setMat4("projection", projection);
         lightCube.setMat4("view", view);
-        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::mat4(1.0f);
         model = glm::translate(model, lightPos);
         model = glm::scale(model, glm::vec3(0.2f));
         lightCube.setMat4("model", model);
