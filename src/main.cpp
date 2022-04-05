@@ -65,47 +65,48 @@ int main() {
     Shader lightCube("resources/shaders/vertexShader1.vs", "resources/shaders/fragmentShader1.fs");
 
 
-    float vertices[] = {-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-                        0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-                        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-                        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-                        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-                        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+    float vertices[] = {
+            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+            0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
+            0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+            0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
 
-                        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-                        0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-                        0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-                        0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-                        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-                        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+            0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
+            0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+            0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
 
-                        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-                        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-                        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-                        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-                        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-                        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+            -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+            -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+            -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+            -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+            -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
 
-                        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-                        0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-                        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-                        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-                        0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-                        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+            0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+            0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+            0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+            0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+            0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+            0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
 
-                        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-                        0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-                        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-                        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-                        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-                        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+            0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
+            0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+            0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
 
-                        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-                        0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-                        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-                        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-                        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-                        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+            0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
+            0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+            0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
 
     };
 
@@ -135,8 +136,6 @@ int main() {
     glGenVertexArrays(1, &VAO);
     //glGenBuffers(1, &EBO);
 
-
-
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
@@ -147,23 +146,34 @@ int main() {
 
 
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6* sizeof(float), (void*)(3*sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8* sizeof(float), (void*)(3*sizeof(float)));
     glEnableVertexAttribArray(1);
 
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8* sizeof(float), (void*)(6*sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+
+
     glGenVertexArrays(1, &cubeVAO);
-    glBindVertexArray(cubeVAO);
+
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    glBindVertexArray(cubeVAO);
+
     //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    //Texture2D texture2D("resources/textures/space_background.bmp", GL_LINEAR, GL_REPEAT, GL_RGBA);
+    Texture2D texture2D("resources/textures/container2.png");
+    Texture2D texture2D1("resources/textures/container2_specular.png");
 
     shader.use();
-    //shader.setInt("t0", 0);
+    shader.setInt("material.diffuse", 0);
+    shader.setInt("material.specular", 1);
 
 
     camera.Position = glm::vec3(0,0,3);
@@ -192,6 +202,7 @@ int main() {
 
 
         //texture2D.active(GL_TEXTURE0);
+        //texture2D1.active(GL_TEXTURE1);
 
         shader.use();
 
@@ -213,10 +224,13 @@ int main() {
         shader.setVec3("light.ambient", ambientColor);
         shader.setVec3("light.diffuse", diffuseColor);
         shader.setVec3("light.specular", glm::vec3(1.0f));
-        shader.setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
-        shader.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
-        shader.setVec3("material.specular", glm::vec3(1.0f));
+        //shader.setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
+        //shader.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+        //shader.setVec3("material.specular", glm::vec3(1.0f));
         shader.setFloat("material.shininess", 32);
+
+        texture2D.active(GL_TEXTURE0);
+        texture2D1.active(GL_TEXTURE1);
 
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
