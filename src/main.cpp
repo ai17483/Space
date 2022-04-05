@@ -30,7 +30,7 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
-glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+
 
 int main() {
 
@@ -202,10 +202,21 @@ int main() {
         shader.setMat4("projection", projection);
         glm::mat4 model1 = glm::mat4(1.0f);
         shader.setMat4("model1", model1);
-        shader.setVec3("lightColor", lightColor);
-        shader.setVec3("lightPos", lightPos);
-        shader.setVec3("objectColor", glm::vec3(1.0f, 0.5f, 0.31f));
+        shader.setVec3("light.lightPos", lightPos);
         shader.setVec3("viewPos", camera.Position);
+
+        glm::vec3 lightColor(1.0f);
+
+        glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
+        glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2);
+
+        shader.setVec3("light.ambient", ambientColor);
+        shader.setVec3("light.diffuse", diffuseColor);
+        shader.setVec3("light.specular", glm::vec3(1.0f));
+        shader.setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
+        shader.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+        shader.setVec3("material.specular", glm::vec3(1.0f));
+        shader.setFloat("material.shininess", 32);
 
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
