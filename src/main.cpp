@@ -61,7 +61,7 @@ int main() {
 
     glEnable(GL_DEPTH_TEST);
 
-    Shader shader("resources/shaders/vertexShader.vs", "resources/shaders/fragmentShader.fs");
+    Shader shader("resources/shaders/lights.vs", "resources/shaders/lights.fs");
     Shader lightCube("resources/shaders/vertexShader1.vs", "resources/shaders/fragmentShader1.fs");
 
 
@@ -121,6 +121,13 @@ int main() {
                 glm::vec3( 1.5f,  2.0f, -2.5f),
                 glm::vec3( 1.5f,  0.2f, -1.5f),
                 glm::vec3(-1.3f,  1.0f, -1.5f)
+    };
+
+    glm::vec3 pointLightPositions[] = {
+            glm::vec3( 0.7f,  0.2f,  2.0f),
+            glm::vec3( 2.3f, -3.3f, -4.0f),
+            glm::vec3(-4.0f,  2.0f, -12.0f),
+            glm::vec3( 0.0f,  0.0f, -3.0f)
     };
 
     /*unsigned int indices[] = {
@@ -212,37 +219,73 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         shader.use();
+        shader.setVec3("viewPos", camera.Position);
+        shader.setFloat("material.shininess", 32.0f);
 
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH/SCR_HEIGHT, 0.1f, 100.0f);
+        /*
+           Here we set all the uniforms for the 5/6 types of lights we have. We have to set them manually and index 
+           the proper PointLight struct in the array to set each uniform variable. This can be done more code-friendly
+           by defining light types as classes and set their values in there, or by using a more efficient uniform approach
+           by using 'Uniform buffer objects', but that is something we'll discuss in the 'Advanced GLSL' tutorial.
+        */
+        // directional light
+        shader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
+        shader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+        shader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
+        shader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
+        // point light 1
+        shader.setVec3("pointLights[0].position", pointLightPositions[0]);
+        shader.setVec3("pointLights[0].ambient", 0.05f, 0.05f, 0.05f);
+        shader.setVec3("pointLights[0].diffuse", 0.8f, 0.8f, 0.8f);
+        shader.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
+        shader.setFloat("pointLights[0].constant", 1.0f);
+        shader.setFloat("pointLights[0].linear", 0.09f);
+        shader.setFloat("pointLights[0].quadratic", 0.032f);
+        // point light 2
+        shader.setVec3("pointLights[1].position", pointLightPositions[1]);
+        shader.setVec3("pointLights[1].ambient", 0.05f, 0.05f, 0.05f);
+        shader.setVec3("pointLights[1].diffuse", 0.8f, 0.8f, 0.8f);
+        shader.setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
+        shader.setFloat("pointLights[1].constant", 1.0f);
+        shader.setFloat("pointLights[1].linear", 0.09f);
+        shader.setFloat("pointLights[1].quadratic", 0.032f);
+        // point light 3
+        shader.setVec3("pointLights[2].position", pointLightPositions[2]);
+        shader.setVec3("pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
+        shader.setVec3("pointLights[2].diffuse", 0.8f, 0.8f, 0.8f);
+        shader.setVec3("pointLights[2].specular", 1.0f, 1.0f, 1.0f);
+        shader.setFloat("pointLights[2].constant", 1.0f);
+        shader.setFloat("pointLights[2].linear", 0.09f);
+        shader.setFloat("pointLights[2].quadratic", 0.032f);
+        // point light 4
+        shader.setVec3("pointLights[3].position", pointLightPositions[3]);
+        shader.setVec3("pointLights[3].ambient", 0.05f, 0.05f, 0.05f);
+        shader.setVec3("pointLights[3].diffuse", 0.8f, 0.8f, 0.8f);
+        shader.setVec3("pointLights[3].specular", 1.0f, 1.0f, 1.0f);
+        shader.setFloat("pointLights[3].constant", 1.0f);
+        shader.setFloat("pointLights[3].linear", 0.09f);
+        shader.setFloat("pointLights[3].quadratic", 0.032f);
+        // spotLight
+        shader.setVec3("spotLight.position", camera.Position);
+        shader.setVec3("spotLight.direction", camera.Front);
+        shader.setVec3("spotLight.ambient", 0.0f, 0.0f, 0.0f);
+        shader.setVec3("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
+        shader.setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
+        shader.setFloat("spotLight.constant", 1.0f);
+        shader.setFloat("spotLight.linear", 0.09f);
+        shader.setFloat("spotLight.quadratic", 0.032f);
+        shader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+        shader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
+
+        // view/projection transformations
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
-
-        shader.setMat4("view", view);
         shader.setMat4("projection", projection);
+        shader.setMat4("view", view);
+
+        // world transformation
         glm::mat4 model = glm::mat4(1.0f);
         shader.setMat4("model", model);
-        shader.setVec3("light.position", lightPos);
-        //shader.setVec3("light.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
-        shader.setVec3("viewPos", camera.Position);
-
-        glm::vec3 lightColor(1.0f);
-
-        glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
-        glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2);
-
-        shader.setVec3("light.ambient", ambientColor);
-        shader.setVec3("light.diffuse", diffuseColor);
-        shader.setVec3("light.specular", glm::vec3(1.0f));
-        //shader.setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
-        //shader.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
-        //shader.setVec3("material.specular", glm::vec3(1.0f));
-        shader.setFloat("material.shininess", 32);
-        shader.setFloat("light.constant", 1.0f);
-        shader.setFloat("light.linear", 0.09f);
-        shader.setFloat("light.quadratic", 0.032f);
-        shader.setVec3("light.position", camera.Position);
-        shader.setVec3("light.direction", camera.Front);
-        shader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
-        shader.setFloat("light.outerCutOff", glm::cos(glm::radians(16.5f)));
 
         texture2D.active(GL_TEXTURE0);
         texture2D1.active(GL_TEXTURE1);
@@ -255,6 +298,7 @@ int main() {
             float angle = 20.0f * i;
             model = glm::rotate(model, angle, glm::vec3(1.0f, 0.3f, 0.5f));
             shader.setMat4("model", model);
+
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
@@ -266,12 +310,15 @@ int main() {
 
         lightCube.setMat4("projection", projection);
         lightCube.setMat4("view", view);
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, lightPos);
-        model = glm::scale(model, glm::vec3(0.2f));
-        lightCube.setMat4("model", model);
-        lightCube.setVec3("objectColor", glm::vec3(1.0f, 1.0f, 1.0f));
-        lightCube.setVec3("lightColor", lightColor);
+
+        for (unsigned int i = 0; i < 4; i++) {
+
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, pointLightPositions[i]);
+            model = glm::scale(model, glm::vec3(0.2f));
+            lightCube.setMat4("model", model);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
 
         glBindVertexArray(cubeVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
