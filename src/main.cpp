@@ -4,11 +4,13 @@
 #include <GLFW/glfw3.h>
 #include <rg/Shader.h>
 #include <stb_image.h>
+#include <learnopengl/filesystem.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <rg/Texture2D.h>
 #include <rg/Camera.h>
+#include <rg/model.h>
 
 void processInput(GLFWwindow *window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -63,7 +65,7 @@ int main() {
 
     Shader shader("resources/shaders/lights.vs", "resources/shaders/lights.fs");
     Shader lightCube("resources/shaders/vertexShader1.vs", "resources/shaders/fragmentShader1.fs");
-
+    Shader model_loading("resources/shaders/model.vs", "resources/shaders/model.fs");
 
     float vertices[] = {
             -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
@@ -195,6 +197,9 @@ int main() {
     shader.setInt("material.diffuse", 0);
     shader.setInt("material.specular", 1);
 
+    Model ourModel("resources/objects/backpack/backpack.obj");
+
+
 
     camera.Position = glm::vec3(0,0,3);
     camera.Front = glm::vec3(0,0,-1);
@@ -323,6 +328,20 @@ int main() {
         glBindVertexArray(cubeVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
+
+
+        model_loading.use();
+
+
+        model_loading.setMat4("projection", projection);
+        model_loading.setMat4("view", view);
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(15.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(1.0f));
+        model_loading.setMat4("model", model);
+
+        ourModel.Draw(model_loading);
 
 
         update(window);
