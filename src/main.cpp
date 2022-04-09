@@ -53,7 +53,7 @@ int main() {
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetKeyCallback(window, key_callback);
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cout << "Failed to init GLAD\n";
@@ -66,6 +66,8 @@ int main() {
     Shader shader("resources/shaders/lights.vs", "resources/shaders/lights.fs");
     Shader lightCube("resources/shaders/vertexShader1.vs", "resources/shaders/fragmentShader1.fs");
     Shader model_loading("resources/shaders/model.vs", "resources/shaders/model.fs");
+
+
 
     float vertices[] = {
             -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
@@ -197,8 +199,8 @@ int main() {
     shader.setInt("material.diffuse", 0);
     shader.setInt("material.specular", 1);
 
-    Model ourModel("resources/objects/backpack/backpack.obj");
 
+    Model ourModel("resources/objects/backpack/backpack.obj");
 
 
     camera.Position = glm::vec3(0,0,3);
@@ -337,7 +339,7 @@ int main() {
         model_loading.setMat4("view", view);
 
         model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(15.0f, 0.0f, 0.0f));
+        model = glm::translate(model, glm::vec3(10.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(1.0f));
         model_loading.setMat4("model", model);
 
