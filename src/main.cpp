@@ -31,6 +31,17 @@ float lastY = 600.0f / 2.0;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
+struct PointLight {
+    glm::vec3 position;
+    glm::vec3 ambient;
+    glm::vec3 diffuse;
+    glm::vec3 specular;
+
+    float constant;
+    float linear;
+    float quadratic;
+};
+
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 
@@ -53,7 +64,7 @@ int main() {
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetKeyCallback(window, key_callback);
-    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cout << "Failed to init GLAD\n";
@@ -201,7 +212,14 @@ int main() {
 
 
     Model ourModel("resources/objects/backpack/backpack.obj");
-
+    PointLight pointLight;
+    pointLight.position = glm::vec3(4.0f, 4.0f, 0.0f);
+    pointLight.ambient = glm::vec3(0.7f, 0.7f, 0.6f);
+    pointLight.diffuse = glm::vec3(0.6f, 0.5f, 0.6f);
+    pointLight.specular = glm::vec3(1.0f, 1.0f, 1.0f);
+    pointLight.constant = 1.0f;
+    pointLight.linear = 0.09f;
+    pointLight.quadratic = 0.032f;
 
     camera.Position = glm::vec3(0,0,3);
     camera.Front = glm::vec3(0,0,-1);
@@ -334,13 +352,30 @@ int main() {
 
         model_loading.use();
 
-
+        model_loading.setVec3("pointLight.position", pointLight.position);
+        model_loading.setVec3("pointLight.ambient", pointLight.ambient);
+        model_loading.setVec3("pointLight.diffuse", pointLight.diffuse);
+        model_loading.setVec3("pointLight.specular", pointLight.specular);
+        model_loading.setFloat("pointLight.constant", pointLight.constant);
+        model_loading.setFloat("pointLight.linear", pointLight.linear);
+        model_loading.setFloat("pointLight.quadratic", pointLight.quadratic);
+        model_loading.setVec3("viewPosition", camera.Position);
         model_loading.setMat4("projection", projection);
         model_loading.setMat4("view", view);
 
         model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(10.0f, 0.0f, 0.0f));
+        float time = glfwGetTime();
+        model = glm::translate(model, glm::vec3(5.0f, 0.0f, 0.0f));
+        //model = glm::rotate(model, time, glm::vec3(0.0f, 1.0f, 0.0f));
         model = glm::scale(model, glm::vec3(1.0f));
+        model_loading.setMat4("model", model);
+
+        ourModel.Draw(model_loading);
+
+        model = glm::mat4(1.0f);
+        time = glfwGetTime();
+        model = glm::translate(model, glm::vec3(5.0f, 5.0f * sin(time), 5.0f * cos(time)));
+        model = glm::scale(model, glm::vec3(0.5f));
         model_loading.setMat4("model", model);
 
         ourModel.Draw(model_loading);
