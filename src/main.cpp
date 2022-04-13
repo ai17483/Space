@@ -12,6 +12,7 @@
 #include <rg/Cubemap2D.h>
 #include <rg/Camera.h>
 #include <rg/model.h>
+#include <rg/Blending2D.h>
 
 void processInput(GLFWwindow *window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -43,7 +44,6 @@ struct PointLight {
     float quadratic;
 };
 
-glm::vec3 sunPosition = glm::vec3(-60.0f, 25.0f, -45.0f);
 
 
 
@@ -77,6 +77,9 @@ int main() {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
+    glFrontFace(GL_CW);
 
 
     camera.Position = glm::vec3(0,0,3);
@@ -93,7 +96,7 @@ int main() {
 
 
     //textures
-    Texture2D texture2D0("resources/textures/window.png");
+    Texture2D texture2D0("resources/textures/window_black.png");
     Texture2D texture2D1("resources/textures/container2.png");
     Texture2D texture2D2("resources/textures/container2_specular.png");
 
@@ -137,11 +140,11 @@ int main() {
 
 
     float vertices[] = {
-            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
             0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
-            0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
             0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
             -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
+            0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
             -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
 
             -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
@@ -158,11 +161,11 @@ int main() {
             -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
             -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
 
-            0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
             0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-            0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+            0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
             0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
             0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+            0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
             0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
 
             -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
@@ -172,11 +175,11 @@ int main() {
             -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
             -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
 
-            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
             0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
-            0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
             0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
             -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
+            0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
             -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
 
     };
@@ -228,14 +231,15 @@ int main() {
 
     float planeVertices[] = {
             // positions          // texture Coords (note we set these higher than 1 (together with GL_REPEAT as texture wrapping mode). this will cause the floor texture to repeat)
-            50.0f, -0.5f,  50.0f,  100.0f, 0.0f,
             -50.0f, -0.5f,  50.0f,  0.0f, 0.0f,
+            50.0f, -0.5f,  50.0f,  100.0f, 0.0f,
             -50.0f, -0.5f, -50.0f,  0.0f, 100.0f,
 
-            50.0f, -0.5f,  50.0f,  100.0f, 0.0f,
             -50.0f, -0.5f, -50.0f,  0.0f, 100.0f,
+            50.0f, -0.5f,  50.0f,  100.0f, 0.0f,
             50.0f, -0.5f, -50.0f,  100.0f, 100.0f
     };
+
 
     glm::vec3 cubePosition[] = {
                 glm::vec3(5.0f, 0.0f, 0.0f),
@@ -256,6 +260,9 @@ int main() {
             glm::vec3(-4.0f,  2.0f, -12.0f),
             glm::vec3( 0.0f,  0.0f, -3.0f)
     };
+
+    glm::vec3 sunPosition = glm::vec3(-60.0f, 25.0f, -45.0f);
+
 
 
     unsigned int planeVBO, planeVAO, VBO, VAO, cubeVAO, worldVAO, worldVBO;
@@ -339,15 +346,7 @@ int main() {
 
 
 
-        my_blending.use();
-        glBindVertexArray(planeVAO);
 
-        texture2D0.active(GL_TEXTURE0);
-
-        my_blending.setMat4("projection", projection);
-        my_blending.setMat4("view", view);
-        my_blending.setMat4("model", glm::mat4(1.0f));
-        glDrawArrays(GL_TRIANGLES, 0, 6);
 
 
 
@@ -516,21 +515,35 @@ int main() {
 
 
 
-        glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
+        glDepthFunc(GL_LEQUAL);
         world.use();
         glBindVertexArray(worldVAO);
 
         cubemap2D0.active(GL_TEXTURE0);
 
-        glm::mat4 view1 = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix
+        glm::mat4 view1 = glm::mat4(glm::mat3(camera.GetViewMatrix()));
         world.setMat4("view", view1);
         world.setMat4("projection", projection);
-        // skybox cube
+
 
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
         glDepthFunc(GL_LESS);
+
+
+
+
+        my_blending.use();
+        glBindVertexArray(planeVAO);
+
+        texture2D0.active(GL_TEXTURE0);
+
+        my_blending.setMat4("projection", projection);
+        my_blending.setMat4("view", view);
+        my_blending.setMat4("model", glm::mat4(1.0f));
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+
 
 
 
