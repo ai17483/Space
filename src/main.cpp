@@ -97,8 +97,8 @@ int main() {
 
     //textures
     Texture2D texture2D0("resources/textures/window_black.png");
-    Texture2D texture2D1("resources/textures/container2.png");
-    Texture2D texture2D2("resources/textures/container2_specular.png");
+    Texture2D texture2D1("resources/textures/crystal.jpg");
+    Texture2D texture2D2("resources/textures/crystalspecular.jpg");
 
 
     my_blending.use();
@@ -119,14 +119,13 @@ int main() {
 
             };
     Cubemap2D cubemap2D0(faces);
-
     world.use();
     world.setInt("skybox", 0);
 
 
     //models
     Model sunModel("resources/objects/sun/13913_Sun_v2_l3.obj");
-    Model ourModel("resources/objects/backpack/backpack.obj");
+    Model ourModel("resources/objects/runestone/Runestones.obj");
     PointLight pointLight;
     pointLight.position = glm::vec3(4.0f, 4.0f, 0.0f);
     pointLight.ambient = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -139,7 +138,7 @@ int main() {
 
 
 
-    float vertices[] = {
+    float crystalVertices[] = {
             0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
             -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
             0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
@@ -180,12 +179,42 @@ int main() {
             0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
             -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
             0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
+            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+            //pyramid
+            0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+            0.0f, 0.75f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+            -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
 
+            0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+            0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.75f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+
+            0.0f, 0.75f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+            0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+            -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+
+            -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+            -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.75f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+
+            -0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f,
+            0.0f, -0.75f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
+            0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+
+            0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f,
+            0.0f, -0.75f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
+            0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+
+            -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f,
+            0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, -0.75f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
+
+            -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f,
+            0.0f, -0.75f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
+            -0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f
     };
 
     float skyboxVertices[] = {
-            // positions
             -1.0f,  1.0f, -1.0f,
             -1.0f, -1.0f, -1.0f,
             1.0f, -1.0f, -1.0f,
@@ -230,43 +259,46 @@ int main() {
     };
 
     float planeVertices[] = {
-            // positions          // texture Coords (note we set these higher than 1 (together with GL_REPEAT as texture wrapping mode). this will cause the floor texture to repeat)
-            -50.0f, -0.5f,  50.0f,  0.0f, 0.0f,
-            50.0f, -0.5f,  50.0f,  100.0f, 0.0f,
-            -50.0f, -0.5f, -50.0f,  0.0f, 100.0f,
+            -15.0f, -0.5f,  15.0f,  0.0f, 0.0f,
+            15.0f, -0.5f,  15.0f,  50.0f, 0.0f,
+            -15.0f, -0.5f, -35.0f,  0.0f, 50.0f,
 
-            -50.0f, -0.5f, -50.0f,  0.0f, 100.0f,
-            50.0f, -0.5f,  50.0f,  100.0f, 0.0f,
-            50.0f, -0.5f, -50.0f,  100.0f, 100.0f
+            -15.0f, -0.5f, -35.0f,  0.0f, 50.0f,
+            15.0f, -0.5f,  15.0f,  50.0f, 0.0f,
+            15.0f, -0.5f, -35.0f,  50.0f, 50.0f
     };
 
-
-    glm::vec3 cubePosition[] = {
-                glm::vec3(5.0f, 0.0f, 0.0f),
-                glm::vec3(-5.0f,0.0f, 0.0f),
-                glm::vec3(5.0f,0.0f, -5.0f),
-                glm::vec3(-5.0f,0.0f, -5.0f),
-                glm::vec3(5.0f, 0.0f, -10.0f),
-                glm::vec3(-5.0f,0.0f, -10.0f),
-                glm::vec3(5.0f, 0.0f, -15.0f),
-                glm::vec3(-5.0f, 0.0f, -15.0f),
-                glm::vec3(5.0f, 0.0f, -20.0f),
-                glm::vec3(-5.0f, 0.0f, -20.0f)
+    glm::vec3 crystalPosition[] = {
+                glm::vec3(2.0f, 0.0f, 10.0f),
+                glm::vec3(-2.0f, 0.0f, 10.0f),
+                glm::vec3(2.0f, 0.0f, 5.0f),
+                glm::vec3(-2.0f, 0.0f, 5.0f),
+                glm::vec3(2.0f, 0.0f, 0.0f),
+                glm::vec3(-2.0f,0.0f, 0.0f),
+                glm::vec3(2.0f,0.0f, -5.0f),
+                glm::vec3(-2.0f,0.0f, -5.0f),
+                glm::vec3(2.0f, 0.0f, -10.0f),
+                glm::vec3(-2.0f,0.0f, -10.0f),
+                glm::vec3(2.0f, 0.0f, -15.0f),
+                glm::vec3(-2.0f, 0.0f, -15.0f),
+                glm::vec3(2.0f, 0.0f, -20.0f),
+                glm::vec3(-2.0f, 0.0f, -20.0f),
+                glm::vec3(2.0f, 0.0f, -25.0f),
+                glm::vec3(-2.0f, 0.0f, -25.0f)
     };
 
     glm::vec3 pointLightPositions[] = {
-            glm::vec3( 0.7f,  0.2f,  2.0f),
-            glm::vec3( 2.3f, -3.3f, -4.0f),
-            glm::vec3(-4.0f,  2.0f, -12.0f),
-            glm::vec3( 0.0f,  0.0f, -3.0f)
+            glm::vec3( 0.0f,  -1.0f, -5.0f),
+            glm::vec3( 0.0f, -1.0f, -10.0f),
+            glm::vec3( 0.0f,  -1.0f, -15.0f),
+            glm::vec3( 0.0f,  -1.0f, -20.0f)
     };
 
-    glm::vec3 sunPosition = glm::vec3(-60.0f, 25.0f, -45.0f);
+    glm::vec3 sunPosition = glm::vec3(100.0f, 25.0f, -70.0f);
 
 
 
-    unsigned int planeVBO, planeVAO, VBO, VAO, cubeVAO, worldVAO, worldVBO;
-
+    unsigned int planeVBO, planeVAO, crystalVBO, crystalVAO, cubeVAO, worldVAO, worldVBO;
 
     //plane
     glGenVertexArrays(1, &planeVAO);
@@ -279,13 +311,12 @@ int main() {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-
-    //cubes
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    //crystal
+    glGenVertexArrays(1, &crystalVAO);
+    glGenBuffers(1, &crystalVBO);
+    glBindVertexArray(crystalVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, crystalVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(crystalVertices), crystalVertices, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8* sizeof(float), (void*)(3*sizeof(float)));
@@ -296,7 +327,7 @@ int main() {
     //light cubes
     glGenVertexArrays(1, &cubeVAO);
     glBindVertexArray(cubeVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, crystalVBO);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
@@ -308,9 +339,6 @@ int main() {
     glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), skyboxVertices, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-
-
-
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -328,24 +356,11 @@ int main() {
 
 
 
-        // model/view/projection transformations
+        // model/view/projection
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 model = glm::mat4(1.0f);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        float time = glfwGetTime();
 
 
 
@@ -354,7 +369,7 @@ int main() {
 
 
         shader.use();
-        glBindVertexArray(VAO);
+        glBindVertexArray(crystalVAO);
 
         texture2D1.active(GL_TEXTURE1);
         texture2D2.active(GL_TEXTURE2);
@@ -410,17 +425,23 @@ int main() {
         shader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
         shader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
 
-
         shader.setMat4("projection", projection);
         shader.setMat4("view", view);
-        for (int i = 0; i < 10; ++i) {
+        for (int i = 0; i < 16; ++i) {
+            time = glfwGetTime() + i/2.0f;
             model = glm::mat4(1.0f);
-            model = glm::translate(model, cubePosition[i]);
-            //float angle = 20.0f * i;
-            //model = glm::rotate(model, angle, glm::vec3(1.0f, 0.3f, 0.5f));
+            model = glm::translate(model, crystalPosition[i]);
+            model = glm::translate(model, glm::vec3(0.0f, 2*sin(time), 0.0f));
+            model = glm::scale(model, glm::vec3(0.4f, 1.5f, 0.4f));
             shader.setMat4("model", model);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
+            glDrawArrays(GL_TRIANGLES, 0, 60);
         }
+
+
+
+
+
+
 
 
 
@@ -441,6 +462,11 @@ int main() {
 
 
 
+
+
+
+
+
         model_loading.use();
 
         model_loading.setVec3("pointLight.position", pointLight.position);
@@ -456,21 +482,19 @@ int main() {
         model_loading.setMat4("view", view);
 
         model = glm::mat4(1.0f);
-        float time = glfwGetTime();
-        model = glm::translate(model, glm::vec3(0.0f, 10.0f, -10.0f));
-        //model = glm::rotate(model, time, glm::vec3(0.0f, 1.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(1.0f));
+
+        model = glm::translate(model, glm::vec3(0.0f, -0.5f, -30.0f));
+        model = glm::scale(model, glm::vec3(0.7f));
         model_loading.setMat4("model", model);
 
         ourModel.Draw(model_loading);
 
-        model = glm::mat4(1.0f);
-        time = glfwGetTime();
-        model = glm::translate(model, glm::vec3(5.0f * cos(time), 5.0f * sin(time)+10.0f, -10.0f));
-        model = glm::scale(model, glm::vec3(0.5f));
-        model_loading.setMat4("model", model);
 
-        ourModel.Draw(model_loading);
+
+
+
+
+
 
 
 
@@ -497,10 +521,21 @@ int main() {
         //time = glfwGetTime();
         model = glm::translate(model, sunPosition);
         model = glm::rotate(model, time, glm::vec3(0.0f, 1.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(0.02f));
+        model = glm::scale(model, glm::vec3(0.1f));
         sun.setMat4("model", model);
 
         sunModel.Draw(sun);
+
+        model = glm::mat4(1.0f);
+        time = glfwGetTime();
+        model = glm::translate(model, glm::vec3(5.0f * cos(time), 10.0f, 8.0f * sin(time) - 10.0f));
+        model = glm::scale(model, glm::vec3(0.002f));
+        model_loading.setMat4("model", model);
+
+        sunModel.Draw(sun);
+
+
+
 
 
 
@@ -525,11 +560,13 @@ int main() {
         world.setMat4("view", view1);
         world.setMat4("projection", projection);
 
-
-
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
         glDepthFunc(GL_LESS);
+
+
+
+
 
 
 
@@ -548,6 +585,7 @@ int main() {
 
 
 
+
         update(window);
         glfwSwapBuffers(window);
 
@@ -556,16 +594,17 @@ int main() {
 
     glDeleteBuffers(1, &worldVBO);
     glDeleteBuffers(1, &planeVBO);
-    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &crystalVBO);
     glDeleteVertexArrays(1, &worldVAO);
     glDeleteVertexArrays(1, &planeVAO);
-    glDeleteVertexArrays(1, &VAO);
+    glDeleteVertexArrays(1, &crystalVAO);
     glDeleteVertexArrays(1, &cubeVAO);
     world.deleteProgram();
     shader.deleteProgram();
     my_blending.deleteProgram();
     model_loading.deleteProgram();
     lightCube.deleteProgram();
+    sun.deleteProgram();
 
     glfwTerminate();
     return 0;
