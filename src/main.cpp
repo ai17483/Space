@@ -33,6 +33,13 @@ float lastY = 600.0f / 2.0;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
+struct DirLight {
+    glm::vec3 direction;
+    glm::vec3 ambient;
+    glm::vec3 diffuse;
+    glm::vec3 specular;
+};
+
 struct PointLight {
     glm::vec3 position;
     glm::vec3 ambient;
@@ -44,7 +51,21 @@ struct PointLight {
     float quadratic;
 };
 
+struct SpotLight {
+    glm::vec3 position;
+    glm::vec3 direction;
 
+    float cutOff;
+    float outerCutOff;
+
+    glm::vec3 ambient;
+    glm::vec3 diffuse;
+    glm::vec3 specular;
+
+    float constant;
+    float linear;
+    float quadratic;
+};
 
 
 int main() {
@@ -126,14 +147,6 @@ int main() {
     //models
     Model sunModel("resources/objects/sun/13913_Sun_v2_l3.obj");
     Model ourModel("resources/objects/runestone/Runestones.obj");
-    PointLight pointLight;
-    pointLight.position = glm::vec3(4.0f, 4.0f, 0.0f);
-    pointLight.ambient = glm::vec3(1.0f, 1.0f, 1.0f);
-    pointLight.diffuse = glm::vec3(0.6f, 0.5f, 0.6f);
-    pointLight.specular = glm::vec3(1.0f, 1.0f, 1.0f);
-    pointLight.constant = 1.0f;
-    pointLight.linear = 0.09f;
-    pointLight.quadratic = 0.032f;
 
 
     float crystalVertices[] = {
@@ -257,13 +270,13 @@ int main() {
     };
 
     float planeVertices[] = {
-            -15.0f, -0.5f,  15.0f,0.0f, 0.0f,
-            15.0f, -0.5f,  15.0f,50.0f, 0.0f,
-            -15.0f, -0.5f, -35.0f,0.0f, 50.0f,
+            -8.0f, -0.5f,  15.0f,0.0f, 0.0f,
+            8.0f, -0.5f,  15.0f,24.0f, 0.0f,
+            -8.0f, -0.5f, -35.0f,0.0f, 24.0f,
 
-            -15.0f, -0.5f, -35.0f,0.0f, 50.0f,
-            15.0f, -0.5f,  15.0f,50.0f, 0.0f,
-            15.0f, -0.5f, -35.0f,50.0f, 50.0f
+            -8.0f, -0.5f, -35.0f,0.0f, 24.0f,
+            8.0f, -0.5f,  15.0f,24.0f, 0.0f,
+            8.0f, -0.5f, -35.0f,24.0f, 24.0f
     };
 
     glm::vec3 crystalPosition[] = {
@@ -286,15 +299,40 @@ int main() {
     };
 
     glm::vec3 spotLightPositions[] = {
-            glm::vec3( 0.0f,  -1.0f, -5.0f),
-            glm::vec3( 0.0f, -1.0f, -10.0f),
-            glm::vec3( 0.0f,  -1.0f, -15.0f),
-            glm::vec3( 0.0f,  -1.0f, -20.0f)
+            glm::vec3( 0.0f,  2.5f, -5.0f),
+            glm::vec3( 0.0f, 2.5f, -15.0f),
+            glm::vec3( -4.0f,  2.5f, -26.0f),
+            glm::vec3( 4.0f,  2.5f, -26.0f)
     };
 
     glm::vec3 sunPosition = glm::vec3(-90.0f, 50.0f, -70.0f);
 
+    DirLight dirLight;
+    dirLight.direction = sunPosition;
+    dirLight.ambient = glm::vec3(0.1f, 0.0f, 0.0f);
+    dirLight.diffuse = glm::vec3(0.5f, 0.5f, 0.5f);;
+    dirLight.specular = glm::vec3(0.005f, 0.005f, 0.005f);
 
+    PointLight pointLight;
+    pointLight.position = glm::vec3(0.0f, 0.0f, 0.0f);
+    pointLight.ambient = glm::vec3(1.0f, 1.0f, 1.0f);
+    pointLight.diffuse = glm::vec3(0.6f, 0.5f, 0.6f);
+    pointLight.specular = glm::vec3(0.6f, 0.5f, 1.0f);
+    pointLight.constant = 1.0f;
+    pointLight.linear = 0.09f;
+    pointLight.quadratic = 0.032f;
+
+    SpotLight spotLight;
+    spotLight.position = glm::vec3(0.0f, 0.0f, 0.0f);
+    spotLight.direction = glm::vec3(0.0f, -1.0f, -1.0f);
+    spotLight.ambient = glm::vec3(0.05f, 1.0f, 1.0f);
+    spotLight.diffuse = glm::vec3(0.6f, 0.5f, 0.6f);
+    spotLight.specular = glm::vec3(1.0f, 1.0f, 1.0f);
+    spotLight.constant = 1.0f;
+    spotLight.linear = 0.09f;
+    spotLight.quadratic = 0.032f;
+    spotLight.cutOff = glm::cos(glm::radians(33.5f));
+    spotLight.outerCutOff = glm::cos(glm::radians(35.0f));
 
     unsigned int planeVBO, planeVAO, crystalVBO, crystalVAO, cubeVAO, worldVAO, worldVBO;
 
@@ -352,8 +390,6 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-
-
         // model/view/projection
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
@@ -370,65 +406,65 @@ int main() {
         texture2D2.active(GL_TEXTURE2);
 
 
-        crystals.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
-        crystals.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-        crystals.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
-        crystals.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
+        crystals.setVec3("dirLight.direction", dirLight.direction);
+        crystals.setVec3("dirLight.ambient", dirLight.ambient);
+        crystals.setVec3("dirLight.diffuse", dirLight.diffuse);
+        crystals.setVec3("dirLight.specular", dirLight.specular);
 
-        crystals.setVec3("pointLight.position", 5.0f * cos(time), 5.0f, 8.0f * sin(time) - 10.0f);
-        crystals.setVec3("pointLight.ambient", 0.05f, 0.05f, 0.05f);
-        crystals.setVec3("pointLight.diffuse", 0.8f, 0.8f, 0.8f);
-        crystals.setVec3("pointLight.specular", 1.0f, 1.0f, 1.0f);
-        crystals.setFloat("pointLight.constant", 1.0f);
-        crystals.setFloat("pointLight.linear", 0.09f);
-        crystals.setFloat("pointLight.quadratic", 0.032f);
+        crystals.setVec3("pointLight.position", glm::vec3(5.0f * cos(time), 5.0f, 8.0f * sin(time) - 10.0f));
+        crystals.setVec3("pointLight.ambient", pointLight.ambient);
+        crystals.setVec3("pointLight.diffuse", pointLight.diffuse);
+        crystals.setVec3("pointLight.specular", pointLight.specular);
+        crystals.setFloat("pointLight.constant", pointLight.constant);
+        crystals.setFloat("pointLight.linear", pointLight.linear);
+        crystals.setFloat("pointLight.quadratic", pointLight.quadratic);
 
         crystals.setVec3("spotLight[0].position", spotLightPositions[0]);
-        crystals.setVec3("spotLight[0].direction", 0.0f, 1.0f, 0.0f);
-        crystals.setVec3("spotLight[0].ambient", 0.0f, 0.0f, 0.0f);
-        crystals.setVec3("spotLight[0].diffuse", 1.0f, 1.0f, 1.0f);
-        crystals.setVec3("spotLight[0].specular", 1.0f, 1.0f, 1.0f);
-        crystals.setFloat("spotLight[0].constant", 1.0f);
-        crystals.setFloat("spotLight[0].linear", 0.09f);
-        crystals.setFloat("spotLight[0].quadratic", 0.032f);
-        crystals.setFloat("spotLight[0].cutOff", glm::cos(glm::radians(50.0f)));
-        crystals.setFloat("spotLight[0].outerCutOff", glm::cos(glm::radians(55.0f)));
+        crystals.setVec3("spotLight[0].direction", spotLight.direction);
+        crystals.setVec3("spotLight[0].ambient", spotLight.ambient);
+        crystals.setVec3("spotLight[0].diffuse", spotLight.diffuse);
+        crystals.setVec3("spotLight[0].specular", spotLight.specular);
+        crystals.setFloat("spotLight[0].constant", spotLight.constant);
+        crystals.setFloat("spotLight[0].linear", spotLight.linear);
+        crystals.setFloat("spotLight[0].quadratic", spotLight.quadratic);
+        crystals.setFloat("spotLight[0].cutOff", spotLight.cutOff);
+        crystals.setFloat("spotLight[0].outerCutOff", spotLight.outerCutOff);
 
         crystals.setVec3("spotLight[1].position", spotLightPositions[1]);
-        crystals.setVec3("spotLight[1].direction", 0.0f, 1.0f, 0.0f);
-        crystals.setVec3("spotLight[1].ambient", 0.0f, 0.0f, 0.0f);
-        crystals.setVec3("spotLight[1].diffuse", 1.0f, 1.0f, 1.0f);
-        crystals.setVec3("spotLight[1].specular", 1.0f, 1.0f, 1.0f);
-        crystals.setFloat("spotLight[1].constant", 1.0f);
-        crystals.setFloat("spotLight[1].linear", 0.09f);
-        crystals.setFloat("spotLight[1].quadratic", 0.032f);
-        crystals.setFloat("spotLight[1].cutOff", glm::cos(glm::radians(50.0f)));
-        crystals.setFloat("spotLight[1].outerCutOff", glm::cos(glm::radians(55.0f)));
+        crystals.setVec3("spotLight[1].direction", spotLight.direction);
+        crystals.setVec3("spotLight[1].ambient", spotLight.ambient);
+        crystals.setVec3("spotLight[1].diffuse", spotLight.diffuse);
+        crystals.setVec3("spotLight[1].specular", spotLight.specular);
+        crystals.setFloat("spotLight[1].constant", spotLight.constant);
+        crystals.setFloat("spotLight[1].linear", spotLight.linear);
+        crystals.setFloat("spotLight[1].quadratic", spotLight.quadratic);
+        crystals.setFloat("spotLight[1].cutOff", spotLight.cutOff);
+        crystals.setFloat("spotLight[1].outerCutOff", spotLight.outerCutOff);
 
         crystals.setVec3("spotLight[2].position", spotLightPositions[2]);
-        crystals.setVec3("spotLight[2].direction", 0.0f, 1.0f, 0.0f);
-        crystals.setVec3("spotLight[2].ambient", 0.0f, 0.0f, 0.0f);
-        crystals.setVec3("spotLight[2].diffuse", 1.0f, 1.0f, 1.0f);
-        crystals.setVec3("spotLight[2].specular", 1.0f, 1.0f, 1.0f);
-        crystals.setFloat("spotLight[2].constant", 1.0f);
-        crystals.setFloat("spotLight[2].linear", 0.09f);
-        crystals.setFloat("spotLight[2].quadratic", 0.032f);
-        crystals.setFloat("spotLight[2].cutOff", glm::cos(glm::radians(50.0f)));
-        crystals.setFloat("spotLight[2].outerCutOff", glm::cos(glm::radians(55.0f)));
+        crystals.setVec3("spotLight[2].direction", spotLight.direction);
+        crystals.setVec3("spotLight[2].ambient", spotLight.ambient);
+        crystals.setVec3("spotLight[2].diffuse", spotLight.diffuse);
+        crystals.setVec3("spotLight[2].specular", spotLight.specular);
+        crystals.setFloat("spotLight[2].constant", spotLight.constant);
+        crystals.setFloat("spotLight[2].linear", spotLight.linear);
+        crystals.setFloat("spotLight[2].quadratic", spotLight.quadratic);
+        crystals.setFloat("spotLight[2].cutOff", spotLight.cutOff);
+        crystals.setFloat("spotLight[2].outerCutOff", spotLight.outerCutOff);
 
         crystals.setVec3("spotLight[3].position", spotLightPositions[3]);
-        crystals.setVec3("spotLight[3].direction", 0.0f, 1.0f, 0.0f);
-        crystals.setVec3("spotLight[3].ambient", 0.0f, 0.0f, 0.0f);
-        crystals.setVec3("spotLight[3].diffuse", 1.0f, 1.0f, 1.0f);
-        crystals.setVec3("spotLight[3].specular", 1.0f, 1.0f, 1.0f);
-        crystals.setFloat("spotLight[3].constant", 1.0f);
-        crystals.setFloat("spotLight[3].linear", 0.09f);
-        crystals.setFloat("spotLight[3].quadratic", 0.032f);
-        crystals.setFloat("spotLight[3].cutOff", glm::cos(glm::radians(50.0f)));
-        crystals.setFloat("spotLight[3].outerCutOff", glm::cos(glm::radians(55.0f)));
+        crystals.setVec3("spotLight[3].direction", spotLight.direction);
+        crystals.setVec3("spotLight[3].ambient", spotLight.ambient);
+        crystals.setVec3("spotLight[3].diffuse", spotLight.diffuse);
+        crystals.setVec3("spotLight[3].specular", spotLight.specular);
+        crystals.setFloat("spotLight[3].constant", spotLight.constant);
+        crystals.setFloat("spotLight[3].linear", spotLight.linear);
+        crystals.setFloat("spotLight[3].quadratic", spotLight.quadratic);
+        crystals.setFloat("spotLight[3].cutOff", spotLight.cutOff);
+        crystals.setFloat("spotLight[3].outerCutOff", spotLight.outerCutOff);
 
         crystals.setVec3("viewPos", camera.Position);
-        crystals.setFloat("material.shininess", 32.0f);
+        crystals.setFloat("material.shininess", 8.0f);
         crystals.setMat4("projection", projection);
         crystals.setMat4("view", view);
         for (int i = 0; i < 16; ++i) {
@@ -440,12 +476,6 @@ int main() {
             crystals.setMat4("model", model);
             glDrawArrays(GL_TRIANGLES, 0, 60);
         }
-
-
-
-
-
-
 
 
 
@@ -466,76 +496,70 @@ int main() {
 
 
 
-
-
-
-
-
         model_loading.use();
 
-        model_loading.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
-        model_loading.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-        model_loading.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
-        model_loading.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
+        model_loading.setVec3("dirLight.direction", dirLight.direction);
+        model_loading.setVec3("dirLight.ambient", dirLight.ambient);
+        model_loading.setVec3("dirLight.diffuse", dirLight.diffuse);
+        model_loading.setVec3("dirLight.specular", dirLight.specular);
 
-        model_loading.setVec3("pointLight.position", 5.0f * cos(time), 5.0f, 8.0f * sin(time) - 10.0f);
-        model_loading.setVec3("pointLight.ambient", 0.05f, 0.05f, 0.05f);
-        model_loading.setVec3("pointLight.diffuse", 0.8f, 0.8f, 0.8f);
-        model_loading.setVec3("pointLight.specular", 1.0f, 1.0f, 1.0f);
-        model_loading.setFloat("pointLight.constant", 1.0f);
-        model_loading.setFloat("pointLight.linear", 0.09f);
-        model_loading.setFloat("pointLight.quadratic", 0.032f);
+        model_loading.setVec3("pointLight.position", glm::vec3(5.0f * cos(time), 5.0f, 8.0f * sin(time) - 10.0f));
+        model_loading.setVec3("pointLight.ambient", pointLight.ambient);
+        model_loading.setVec3("pointLight.diffuse", pointLight.diffuse);
+        model_loading.setVec3("pointLight.specular", pointLight.specular);
+        model_loading.setFloat("pointLight.constant", pointLight.constant);
+        model_loading.setFloat("pointLight.linear", pointLight.linear);
+        model_loading.setFloat("pointLight.quadratic", pointLight.quadratic);
 
         model_loading.setVec3("spotLight[0].position", spotLightPositions[0]);
-        model_loading.setVec3("spotLight[0].direction", 0.0f, 1.0f, 0.0f);
-        model_loading.setVec3("spotLight[0].ambient", 0.05f, 0.05f, 0.05f);
-        model_loading.setVec3("spotLight[0].diffuse", 0.8f, 0.8f, 0.8f);
-        model_loading.setVec3("spotLight[0].specular", 1.0f, 1.0f, 1.0f);
-        model_loading.setFloat("spotLight[0].constant", 1.0f);
-        model_loading.setFloat("spotLight[0].linear", 0.09f);
-        model_loading.setFloat("spotLight[0].quadratic", 0.032f);
-        model_loading.setFloat("spotLight[0].cutOff", glm::cos(glm::radians(12.5f)));
-        model_loading.setFloat("spotLight[0].outerCutOff", glm::cos(glm::radians(15.0f)));
+        model_loading.setVec3("spotLight[0].direction", spotLight.direction);
+        model_loading.setVec3("spotLight[0].ambient", spotLight.ambient);
+        model_loading.setVec3("spotLight[0].diffuse", spotLight.diffuse);
+        model_loading.setVec3("spotLight[0].specular", spotLight.specular);
+        model_loading.setFloat("spotLight[0].constant", spotLight.constant);
+        model_loading.setFloat("spotLight[0].linear", spotLight.linear);
+        model_loading.setFloat("spotLight[0].quadratic", spotLight.quadratic);
+        model_loading.setFloat("spotLight[0].cutOff", spotLight.cutOff);
+        model_loading.setFloat("spotLight[0].outerCutOff", spotLight.outerCutOff);
 
         model_loading.setVec3("spotLight[1].position", spotLightPositions[1]);
-        model_loading.setVec3("spotLight[1].direction", 0.0f, 1.0f, 0.0f);
-        model_loading.setVec3("spotLight[1].ambient", 0.05f, 0.05f, 0.05f);
-        model_loading.setVec3("spotLight[1].diffuse", 0.8f, 0.8f, 0.8f);
-        model_loading.setVec3("spotLight[1].specular", 1.0f, 1.0f, 1.0f);
-        model_loading.setFloat("spotLight[1].constant", 1.0f);
-        model_loading.setFloat("spotLight[1].linear", 0.09f);
-        model_loading.setFloat("spotLight[1].quadratic", 0.032f);
-        model_loading.setFloat("spotLight[1].cutOff", glm::cos(glm::radians(12.5f)));
-        model_loading.setFloat("spotLight[1].outerCutOff", glm::cos(glm::radians(15.0f)));
+        model_loading.setVec3("spotLight[1].direction", spotLight.direction);
+        model_loading.setVec3("spotLight[1].ambient", spotLight.ambient);
+        model_loading.setVec3("spotLight[1].diffuse", spotLight.diffuse);
+        model_loading.setVec3("spotLight[1].specular", spotLight.specular);
+        model_loading.setFloat("spotLight[1].constant", spotLight.constant);
+        model_loading.setFloat("spotLight[1].linear", spotLight.linear);
+        model_loading.setFloat("spotLight[1].quadratic", spotLight.quadratic);
+        model_loading.setFloat("spotLight[1].cutOff", spotLight.cutOff);
+        model_loading.setFloat("spotLight[1].outerCutOff", spotLight.outerCutOff);
 
         model_loading.setVec3("spotLight[2].position", spotLightPositions[2]);
-        model_loading.setVec3("spotLight[2].direction", 0.0f, 1.0f, 0.0f);
-        model_loading.setVec3("spotLight[2].ambient", 0.05f, 0.05f, 0.05f);
-        model_loading.setVec3("spotLight[2].diffuse", 0.8f, 0.8f, 0.8f);
-        model_loading.setVec3("spotLight[2].specular", 1.0f, 1.0f, 1.0f);
-        model_loading.setFloat("spotLight[2].constant", 1.0f);
-        model_loading.setFloat("spotLight[2].linear", 0.09f);
-        model_loading.setFloat("spotLight[2].quadratic", 0.032f);
-        model_loading.setFloat("spotLight[2].cutOff", glm::cos(glm::radians(12.5f)));
-        model_loading.setFloat("spotLight[2].outerCutOff", glm::cos(glm::radians(15.0f)));
+        model_loading.setVec3("spotLight[2].direction", spotLight.direction);
+        model_loading.setVec3("spotLight[2].ambient", spotLight.ambient);
+        model_loading.setVec3("spotLight[2].diffuse", spotLight.diffuse);
+        model_loading.setVec3("spotLight[2].specular", spotLight.specular);
+        model_loading.setFloat("spotLight[2].constant", spotLight.constant);
+        model_loading.setFloat("spotLight[2].linear", spotLight.linear);
+        model_loading.setFloat("spotLight[2].quadratic", spotLight.quadratic);
+        model_loading.setFloat("spotLight[2].cutOff", spotLight.cutOff);
+        model_loading.setFloat("spotLight[2].outerCutOff", spotLight.outerCutOff);
 
         model_loading.setVec3("spotLight[3].position", spotLightPositions[3]);
-        model_loading.setVec3("spotLight[3].direction", 0.0f, 1.0f, 0.0f);
-        model_loading.setVec3("spotLight[3].ambient", 0.05f, 0.05f, 0.05f);
-        model_loading.setVec3("spotLight[3].diffuse", 0.8f, 0.8f, 0.8f);
-        model_loading.setVec3("spotLight[3].specular", 1.0f, 1.0f, 1.0f);
-        model_loading.setFloat("spotLight[3].constant", 1.0f);
-        model_loading.setFloat("spotLight[3].linear", 0.09f);
-        model_loading.setFloat("spotLight[3].quadratic", 0.032f);
-        model_loading.setFloat("spotLight[3].cutOff", glm::cos(glm::radians(12.5f)));
-        model_loading.setFloat("spotLight[3].outerCutOff", glm::cos(glm::radians(15.0f)));
+        model_loading.setVec3("spotLight[3].direction", spotLight.direction);
+        model_loading.setVec3("spotLight[3].ambient", spotLight.ambient);
+        model_loading.setVec3("spotLight[3].diffuse", spotLight.diffuse);
+        model_loading.setVec3("spotLight[3].specular", spotLight.specular);
+        model_loading.setFloat("spotLight[3].constant", spotLight.constant);
+        model_loading.setFloat("spotLight[3].linear", spotLight.linear);
+        model_loading.setFloat("spotLight[3].quadratic", spotLight.quadratic);
+        model_loading.setFloat("spotLight[3].cutOff", spotLight.cutOff);
+        model_loading.setFloat("spotLight[3].outerCutOff", spotLight.outerCutOff);
 
         model_loading.setVec3("viewPosition", camera.Position);
         model_loading.setMat4("projection", projection);
         model_loading.setMat4("view", view);
 
         model = glm::mat4(1.0f);
-
         model = glm::translate(model, glm::vec3(0.0f, -0.5f, -30.0f));
         model = glm::scale(model, glm::vec3(0.7f));
         model_loading.setMat4("model", model);
@@ -547,73 +571,64 @@ int main() {
 
 
 
-
-
-
-
-
-
-
-
-
         sun.use();
 
-        sun.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
-        sun.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-        sun.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
-        sun.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
+        sun.setVec3("dirLight.direction", dirLight.direction);
+        sun.setVec3("dirLight.ambient", dirLight.ambient);
+        sun.setVec3("dirLight.diffuse", dirLight.diffuse);
+        sun.setVec3("dirLight.specular", dirLight.specular);
 
-        sun.setVec3("pointLight.position", 0.0f, 5.0f, -15.0f);
-        sun.setVec3("pointLight.ambient", 0.05f, 0.05f, 0.05f);
-        sun.setVec3("pointLight.diffuse", 0.8f, 0.8f, 0.8f);
-        sun.setVec3("pointLight.specular", 1.0f, 1.0f, 1.0f);
-        sun.setFloat("pointLight.constant", 1.0f);
-        sun.setFloat("pointLight.linear", 0.09f);
-        sun.setFloat("pointLight.quadratic", 0.032f);
+        sun.setVec3("pointLight.position", pointLight.position);
+        sun.setVec3("pointLight.ambient", pointLight.ambient);
+        sun.setVec3("pointLight.diffuse", pointLight.diffuse);
+        sun.setVec3("pointLight.specular", pointLight.specular);
+        sun.setFloat("pointLight.constant", pointLight.constant);
+        sun.setFloat("pointLight.linear", pointLight.linear);
+        sun.setFloat("pointLight.quadratic", pointLight.quadratic);
 
         sun.setVec3("spotLight[0].position", spotLightPositions[0]);
-        sun.setVec3("spotLight[0].direction", 0.0f, 1.0f, 0.0f);
-        sun.setVec3("spotLight[0].ambient", 0.05f, 0.05f, 0.05f);
-        sun.setVec3("spotLight[0].diffuse", 0.8f, 0.8f, 0.8f);
-        sun.setVec3("spotLight[0].specular", 1.0f, 1.0f, 1.0f);
-        sun.setFloat("spotLight[0].constant", 1.0f);
-        sun.setFloat("spotLight[0].linear", 0.09f);
-        sun.setFloat("spotLight[0].quadratic", 0.032f);
-        sun.setFloat("spotLight[0].cutOff", glm::cos(glm::radians(12.5f)));
-        sun.setFloat("spotLight[0].outerCutOff", glm::cos(glm::radians(15.0f)));
+        sun.setVec3("spotLight[0].direction", spotLight.direction);
+        sun.setVec3("spotLight[0].ambient", spotLight.ambient);
+        sun.setVec3("spotLight[0].diffuse", spotLight.diffuse);
+        sun.setVec3("spotLight[0].specular", spotLight.specular);
+        sun.setFloat("spotLight[0].constant", spotLight.constant);
+        sun.setFloat("spotLight[0].linear", spotLight.linear);
+        sun.setFloat("spotLight[0].quadratic", spotLight.quadratic);
+        sun.setFloat("spotLight[0].cutOff", spotLight.cutOff);
+        sun.setFloat("spotLight[0].outerCutOff", spotLight.outerCutOff);
 
         sun.setVec3("spotLight[1].position", spotLightPositions[1]);
-        sun.setVec3("spotLight[1].direction", 0.0f, 1.0f, 0.0f);
-        sun.setVec3("spotLight[1].ambient", 0.05f, 0.05f, 0.05f);
-        sun.setVec3("spotLight[1].diffuse", 0.8f, 0.8f, 0.8f);
-        sun.setVec3("spotLight[1].specular", 1.0f, 1.0f, 1.0f);
-        sun.setFloat("spotLight[1].constant", 1.0f);
-        sun.setFloat("spotLight[1].linear", 0.09f);
-        sun.setFloat("spotLight[1].quadratic", 0.032f);
-        sun.setFloat("spotLight[1].cutOff", glm::cos(glm::radians(12.5f)));
-        sun.setFloat("spotLight[1].outerCutOff", glm::cos(glm::radians(15.0f)));
+        sun.setVec3("spotLight[1].direction", spotLight.direction);
+        sun.setVec3("spotLight[1].ambient", spotLight.ambient);
+        sun.setVec3("spotLight[1].diffuse", spotLight.diffuse);
+        sun.setVec3("spotLight[1].specular", spotLight.specular);
+        sun.setFloat("spotLight[1].constant", spotLight.constant);
+        sun.setFloat("spotLight[1].linear", spotLight.linear);
+        sun.setFloat("spotLight[1].quadratic", spotLight.quadratic);
+        sun.setFloat("spotLight[1].cutOff", spotLight.cutOff);
+        sun.setFloat("spotLight[1].outerCutOff", spotLight.outerCutOff);
 
         sun.setVec3("spotLight[2].position", spotLightPositions[2]);
-        sun.setVec3("spotLight[2].direction", 0.0f, 1.0f, 0.0f);
-        sun.setVec3("spotLight[2].ambient", 0.05f, 0.05f, 0.05f);
-        sun.setVec3("spotLight[2].diffuse", 0.8f, 0.8f, 0.8f);
-        sun.setVec3("spotLight[2].specular", 1.0f, 1.0f, 1.0f);
-        sun.setFloat("spotLight[2].constant", 1.0f);
-        sun.setFloat("spotLight[2].linear", 0.09f);
-        sun.setFloat("spotLight[2].quadratic", 0.032f);
-        sun.setFloat("spotLight[2].cutOff", glm::cos(glm::radians(12.5f)));
-        sun.setFloat("spotLight[2].outerCutOff", glm::cos(glm::radians(15.0f)));
+        sun.setVec3("spotLight[2].direction", spotLight.direction);
+        sun.setVec3("spotLight[2].ambient", spotLight.ambient);
+        sun.setVec3("spotLight[2].diffuse", spotLight.diffuse);
+        sun.setVec3("spotLight[2].specular", spotLight.specular);
+        sun.setFloat("spotLight[2].constant", spotLight.constant);
+        sun.setFloat("spotLight[2].linear", spotLight.linear);
+        sun.setFloat("spotLight[2].quadratic", spotLight.quadratic);
+        sun.setFloat("spotLight[2].cutOff", spotLight.cutOff);
+        sun.setFloat("spotLight[2].outerCutOff", spotLight.outerCutOff);
 
         sun.setVec3("spotLight[3].position", spotLightPositions[3]);
-        sun.setVec3("spotLight[3].direction", 0.0f, 1.0f, 0.0f);
-        sun.setVec3("spotLight[3].ambient", 0.05f, 0.05f, 0.05f);
-        sun.setVec3("spotLight[3].diffuse", 0.8f, 0.8f, 0.8f);
-        sun.setVec3("spotLight[3].specular", 1.0f, 1.0f, 1.0f);
-        sun.setFloat("spotLight[3].constant", 1.0f);
-        sun.setFloat("spotLight[3].linear", 0.09f);
-        sun.setFloat("spotLight[3].quadratic", 0.032f);
-        sun.setFloat("spotLight[3].cutOff", glm::cos(glm::radians(50.0f)));
-        sun.setFloat("spotLight[3].outerCutOff", glm::cos(glm::radians(55.0f)));
+        sun.setVec3("spotLight[3].direction", spotLight.direction);
+        sun.setVec3("spotLight[3].ambient", spotLight.ambient);
+        sun.setVec3("spotLight[3].diffuse", spotLight.diffuse);
+        sun.setVec3("spotLight[3].specular", spotLight.specular);
+        sun.setFloat("spotLight[3].constant", spotLight.constant);
+        sun.setFloat("spotLight[3].linear", spotLight.linear);
+        sun.setFloat("spotLight[3].quadratic", spotLight.quadratic);
+        sun.setFloat("spotLight[3].cutOff", spotLight.cutOff);
+        sun.setFloat("spotLight[3].outerCutOff", spotLight.outerCutOff);
 
         sun.setVec3("viewPosition", camera.Position);
         sun.setMat4("projection", projection);
@@ -627,24 +642,15 @@ int main() {
 
         sunModel.Draw(sun);
 
+        sun.use();
+
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(5.0f * cos(time), 5.0f, 8.0f * sin(time) - 10.0f));
+        model = glm::rotate(model, time, glm::vec3(1.0f, 1.0f, 0.0f));
         model = glm::scale(model, glm::vec3(0.002f));
         model_loading.setMat4("model", model);
 
         sunModel.Draw(sun);
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -667,10 +673,6 @@ int main() {
 
 
 
-
-
-
-
         my_blending.use();
         glBindVertexArray(planeVAO);
 
@@ -682,13 +684,8 @@ int main() {
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
 
-
-
-
-
         update(window);
         glfwSwapBuffers(window);
-
     }
 
 
