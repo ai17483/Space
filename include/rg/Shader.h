@@ -12,7 +12,7 @@
 class Shader {
     unsigned int m_Id;
 public:
-    Shader(std::string vertexShaderPath, std::string fragmentShaderPath) {
+    Shader(std::string vertexShaderPath, std::string fragmentShaderPath, std::string geometryShaderPath = "") {
         //appendShaderFolderIfNotPresent(vertexShaderPath);
         //appendShaderFolderIfNotPresent(fragmentShaderPath);
         // build and compile our shader program
@@ -34,10 +34,10 @@ public:
             std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
         }
         // fragment shader
-        int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
         std::string fsString = readFileContents(fragmentShaderPath);
         ASSERT(!fsString.empty(), "Fragment shader empty!");
         const char* fragmentShaderSource = fsString.c_str();
+        int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
         glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
         glCompileShader(fragmentShader);
         // check for shader compile errors
@@ -47,10 +47,28 @@ public:
             glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
             std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
         }
+        // geometry shader
+        int geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
+        if(!geometryShaderPath.empty()) {
+            std::string gsString = readFileContents(geometryShaderPath);
+            ASSERT(!gsString.empty(), "Geometry shader empty!");
+            const char *geometryShaderSource = gsString.c_str();
+
+            glShaderSource(geometryShader, 1, &geometryShaderSource, NULL);
+            glCompileShader(geometryShader);
+            // check for shader compile errors
+            glGetShaderiv(geometryShader, GL_COMPILE_STATUS, &success);
+            if (!success) {
+                glGetShaderInfoLog(geometryShader, 512, NULL, infoLog);
+                std::cout << "ERROR::SHADER::GEOMETRY::COMPILATION_FAILED\n" << infoLog << std::endl;
+            }
+        }
         // link shaders
         int shaderProgram = glCreateProgram();
         glAttachShader(shaderProgram, vertexShader);
         glAttachShader(shaderProgram, fragmentShader);
+        if(!geometryShaderPath.empty())
+            glAttachShader(shaderProgram, geometryShader);
         glLinkProgram(shaderProgram);
         // check for linking errors
         glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
@@ -60,6 +78,8 @@ public:
         }
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
+        if(!geometryShaderPath.empty())
+            glDeleteShader(geometryShader);
         m_Id = shaderProgram;
     }
 

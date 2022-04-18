@@ -11,7 +11,7 @@
 class Texture2D {
     unsigned int m_Id;
 public:
-    Texture2D(std::string pathToImg) {
+    Texture2D(std::string pathToImg, bool gammaCorrection) {
         unsigned int tex;
         glGenTextures(1, &tex);
 
@@ -20,13 +20,21 @@ public:
         unsigned char* data = stbi_load(pathToImg.c_str(), &width, &height, &nChannel, 0);
 
         if(data) {
-            GLenum format;
+            GLenum internalFormat;
+            GLenum dataFormat;
             if(nChannel == 1)
-                format = GL_RED;
+                internalFormat = dataFormat = GL_RED;
             else if (nChannel == 3)
-                format = GL_RGB;
+            {
+                internalFormat = gammaCorrection ? GL_SRGB : GL_RGB;
+                dataFormat = GL_RGB;
+            }
             else if (nChannel == 4)
-                format = GL_RGBA;
+            {
+                internalFormat = gammaCorrection ? GL_SRGB_ALPHA : GL_RGBA;
+                dataFormat = GL_RGBA;
+            }
+
 
 
             glBindTexture(GL_TEXTURE_2D, tex);
@@ -39,7 +47,7 @@ public:
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 
-            glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+            glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, dataFormat, GL_UNSIGNED_BYTE, data);
             glGenerateMipmap(GL_TEXTURE_2D);
 
         }
