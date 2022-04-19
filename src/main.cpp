@@ -3,16 +3,14 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <rg/Shader.h>
-#include <stb_image.h>
 #include <learnopengl/filesystem.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <rg/Texture2D.h>
 #include <rg/Cubemap2D.h>
 #include <rg/Camera.h>
 #include <rg/model.h>
-#include <rg/Blending2D.h>
+
 
 void processInput(GLFWwindow *window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -20,7 +18,7 @@ void update(GLFWwindow *window);
 void key_callback(GLFWwindow * window, int key, int scancode, int action, int mods);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void renderQuad();
+
 
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
@@ -136,12 +134,11 @@ int main() {
     crystals.setInt("material.specular", 2);
 
     blur.use();
-    blur.setInt("image", 6);
+    blur.setInt("image", 0);
 
     hdr_light.use();
-    hdr_light.setInt("hdrBuffer", 4);
-    hdr_light.setInt("bloomBlur", 5);
-
+    hdr_light.setInt("hdrBuffer", 0);
+    hdr_light.setInt("bloomBlur", 1);
 
     vector<std::string> faces
             {
@@ -161,6 +158,7 @@ int main() {
     //models
     Model sunModel("resources/objects/sun/13913_Sun_v2_l3.obj");
     Model ourModel("resources/objects/runestone/Runestones.obj");
+
 
 
 
@@ -296,6 +294,13 @@ int main() {
             8.0f, -0.5f, -35.0f,24.0f, 24.0f
     };
 
+    float quadVertices[] = {
+            -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+            1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+            1.0f, -1.0f, 0.0f, 1.0f, 0.0f
+    };
+
     glm::vec3 crystalPosition[] = {
                 glm::vec3(2.0f, 0.0f, 10.0f),
                 glm::vec3(-2.0f, 0.0f, 10.0f),
@@ -326,15 +331,15 @@ int main() {
 
     DirLight dirLight;
     dirLight.direction = sunPosition;
-    dirLight.ambient = glm::vec3(0.1f, 0.0f, 0.0f);
+    dirLight.ambient = glm::vec3(1.0f, 1.0f, 1.0f);
     dirLight.diffuse = glm::vec3(0.5f, 0.5f, 0.5f);;
     dirLight.specular = glm::vec3(0.005f, 0.005f, 0.005f);
 
     PointLight pointLight;
     pointLight.position = glm::vec3(0.0f, 0.0f, 0.0f);
-    pointLight.ambient = glm::vec3(15.0f, 15.0f, 15.0f);
-    pointLight.diffuse = glm::vec3(20.6f, 20.5f, 20.6f);
-    pointLight.specular = glm::vec3(0.6f, 0.5f, 1.0f);
+    pointLight.ambient = glm::vec3(10.0f, 10.0f, 10.0f);
+    pointLight.diffuse = glm::vec3(100.0f, 100.0f, 100.0f);
+    pointLight.specular = glm::vec3(12.0f, 12.0f, 12.0f);
     pointLight.constant = 1.0f;
     pointLight.linear = 0.09f;
     pointLight.quadratic = 0.032f;
@@ -342,16 +347,16 @@ int main() {
     SpotLight spotLight;
     spotLight.position = glm::vec3(0.0f, 0.0f, 0.0f);
     spotLight.direction = glm::vec3(0.0f, -1.0f, -1.0f);
-    spotLight.ambient = glm::vec3(0.05f, 1.0f, 1.0f);
-    spotLight.diffuse = glm::vec3(0.6f, 0.5f, 0.6f);
-    spotLight.specular = glm::vec3(1.0f, 1.0f, 1.0f);
+    spotLight.ambient = glm::vec3(15.0f, 15.0f, 15.0f);
+    spotLight.diffuse = glm::vec3(64.0f, 64.0f, 64.0f);
+    spotLight.specular = glm::vec3(15.0f, 15.0f, 15.0f);
     spotLight.constant = 1.0f;
     spotLight.linear = 0.09f;
     spotLight.quadratic = 0.032f;
     spotLight.cutOff = glm::cos(glm::radians(33.5f));
-    spotLight.outerCutOff = glm::cos(glm::radians(35.0f));
+    spotLight.outerCutOff = glm::cos(glm::radians(50.0f));
 
-    unsigned int planeVBO, planeVAO, crystalVBO, crystalVAO, cubeVAO, worldVAO, worldVBO;
+    unsigned int planeVBO, planeVAO, crystalVBO, crystalVAO, cubeVBO, cubeVAO, worldVBO, worldVAO, quadVBO, quadVAO;
 
     //plane
     glGenVertexArrays(1, &planeVAO);
@@ -379,10 +384,16 @@ int main() {
 
     //light cubes
     glGenVertexArrays(1, &cubeVAO);
+    glGenBuffers(1, &cubeVBO);
     glBindVertexArray(cubeVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, crystalVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(crystalVertices), crystalVertices, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8* sizeof(float), (void*)(3*sizeof(float)));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8* sizeof(float), (void*)(6*sizeof(float)));
+    glEnableVertexAttribArray(2);
 
     //world cube
     glGenVertexArrays(1, &worldVAO);
@@ -393,13 +404,23 @@ int main() {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    //quad
+    glGenVertexArrays(1, &quadVAO);
+    glGenBuffers(1, &quadVBO);
+    glBindVertexArray(quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 
-    /*unsigned int hdrFBO;
+
+    //HDR, Bloom
+    unsigned int hdrFBO;
     glGenFramebuffers(1, &hdrFBO);
     glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
-    // create floating point color buffer
+
     unsigned int colorBuffer[2];
     glGenTextures(2, colorBuffer);
     for (unsigned int i = 0; i < 2; i++) {
@@ -409,24 +430,20 @@ int main() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        // attach texture to framebuffer
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, colorBuffer[i], 0);
     }
-    // create depth buffer (renderbuffer)
+
     unsigned int rboDepth;
     glGenRenderbuffers(1, &rboDepth);
     glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
-    // tell OpenGL which color attachments we'll use (of this framebuffer) for rendering
     unsigned int attachments[2] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
     glDrawBuffers(2, attachments);
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         std::cout << "Framebuffer not complete!" << std::endl;
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-
-    // ping-pong-framebuffer for blurring
     unsigned int pingpongFBO[2];
     unsigned int pingpongColorbuffers[2];
     glGenFramebuffers(2, pingpongFBO);
@@ -440,10 +457,14 @@ int main() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pingpongColorbuffers[i], 0);
-        // also check if framebuffers are complete (no need for depth buffer)
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             std::cout << "Framebuffer not complete!" << std::endl;
-    }*/
+    }
+
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
 
 
     while(!glfwWindowShouldClose(window)) {
@@ -454,10 +475,11 @@ int main() {
 
         processInput(window);
         glfwPollEvents();
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        /*glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);*/
+        glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         // model/view/projection
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
@@ -531,8 +553,9 @@ int main() {
         crystals.setFloat("spotLight[3].cutOff", spotLight.cutOff);
         crystals.setFloat("spotLight[3].outerCutOff", spotLight.outerCutOff);
 
+        crystals.setVec3("lightColor", lightColor);
         crystals.setVec3("viewPos", camera.Position);
-        crystals.setFloat("material.shininess", 8.0f);
+        crystals.setFloat("material.shininess", 32.0f);
         crystals.setMat4("projection", projection);
         crystals.setMat4("view", view);
         for (int i = 0; i < 16; ++i) {
@@ -545,6 +568,9 @@ int main() {
             glDrawArrays(GL_TRIANGLES, 0, 60);
         }
 
+
+
+
         lightCube.use();
         glBindVertexArray(cubeVAO);
 
@@ -552,84 +578,12 @@ int main() {
         lightCube.setMat4("view", view);
         for (unsigned int i = 0; i < 4; i++) {
             model = glm::mat4(1.0f);
-            model = glm::translate(model, spotLightPositions[i]);
+            model = glm::translate(model, glm::vec3(spotLightPositions[i]));
             model = glm::scale(model, glm::vec3(0.2f));
             lightCube.setMat4("model", model);
             lightCube.setVec3("lightColor", lightColor);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
-
-
-        model_loading.use();
-
-        model_loading.setVec3("dirLight.direction", dirLight.direction);
-        model_loading.setVec3("dirLight.ambient", dirLight.ambient);
-        model_loading.setVec3("dirLight.diffuse", dirLight.diffuse);
-        model_loading.setVec3("dirLight.specular", dirLight.specular);
-
-        model_loading.setVec3("pointLight.position", glm::vec3(5.0f * cos(time), 5.0f, 8.0f * sin(time) - 10.0f));
-        model_loading.setVec3("pointLight.ambient", pointLight.ambient);
-        model_loading.setVec3("pointLight.diffuse", pointLight.diffuse);
-        model_loading.setVec3("pointLight.specular", pointLight.specular);
-        model_loading.setFloat("pointLight.constant", pointLight.constant);
-        model_loading.setFloat("pointLight.linear", pointLight.linear);
-        model_loading.setFloat("pointLight.quadratic", pointLight.quadratic);
-
-        model_loading.setVec3("spotLight[0].position", spotLightPositions[0]);
-        model_loading.setVec3("spotLight[0].direction", spotLight.direction);
-        model_loading.setVec3("spotLight[0].ambient", spotLight.ambient);
-        model_loading.setVec3("spotLight[0].diffuse", spotLight.diffuse);
-        model_loading.setVec3("spotLight[0].specular", spotLight.specular);
-        model_loading.setFloat("spotLight[0].constant", spotLight.constant);
-        model_loading.setFloat("spotLight[0].linear", spotLight.linear);
-        model_loading.setFloat("spotLight[0].quadratic", spotLight.quadratic);
-        model_loading.setFloat("spotLight[0].cutOff", spotLight.cutOff);
-        model_loading.setFloat("spotLight[0].outerCutOff", spotLight.outerCutOff);
-
-        model_loading.setVec3("spotLight[1].position", spotLightPositions[1]);
-        model_loading.setVec3("spotLight[1].direction", spotLight.direction);
-        model_loading.setVec3("spotLight[1].ambient", spotLight.ambient);
-        model_loading.setVec3("spotLight[1].diffuse", spotLight.diffuse);
-        model_loading.setVec3("spotLight[1].specular", spotLight.specular);
-        model_loading.setFloat("spotLight[1].constant", spotLight.constant);
-        model_loading.setFloat("spotLight[1].linear", spotLight.linear);
-        model_loading.setFloat("spotLight[1].quadratic", spotLight.quadratic);
-        model_loading.setFloat("spotLight[1].cutOff", spotLight.cutOff);
-        model_loading.setFloat("spotLight[1].outerCutOff", spotLight.outerCutOff);
-
-        model_loading.setVec3("spotLight[2].position", spotLightPositions[2]);
-        model_loading.setVec3("spotLight[2].direction", spotLight.direction);
-        model_loading.setVec3("spotLight[2].ambient", spotLight.ambient);
-        model_loading.setVec3("spotLight[2].diffuse", spotLight.diffuse);
-        model_loading.setVec3("spotLight[2].specular", spotLight.specular);
-        model_loading.setFloat("spotLight[2].constant", spotLight.constant);
-        model_loading.setFloat("spotLight[2].linear", spotLight.linear);
-        model_loading.setFloat("spotLight[2].quadratic", spotLight.quadratic);
-        model_loading.setFloat("spotLight[2].cutOff", spotLight.cutOff);
-        model_loading.setFloat("spotLight[2].outerCutOff", spotLight.outerCutOff);
-
-        model_loading.setVec3("spotLight[3].position", spotLightPositions[3]);
-        model_loading.setVec3("spotLight[3].direction", spotLight.direction);
-        model_loading.setVec3("spotLight[3].ambient", spotLight.ambient);
-        model_loading.setVec3("spotLight[3].diffuse", spotLight.diffuse);
-        model_loading.setVec3("spotLight[3].specular", spotLight.specular);
-        model_loading.setFloat("spotLight[3].constant", spotLight.constant);
-        model_loading.setFloat("spotLight[3].linear", spotLight.linear);
-        model_loading.setFloat("spotLight[3].quadratic", spotLight.quadratic);
-        model_loading.setFloat("spotLight[3].cutOff", spotLight.cutOff);
-        model_loading.setFloat("spotLight[3].outerCutOff", spotLight.outerCutOff);
-
-        model_loading.setVec3("viewPosition", camera.Position);
-        model_loading.setMat4("projection", projection);
-        model_loading.setMat4("view", view);
-
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, -0.5f, -30.0f));
-        model = glm::scale(model, glm::vec3(0.7f));
-        model_loading.setMat4("model", model);
-
-        ourModel.Draw(model_loading);
-
 
 
 
@@ -720,6 +674,7 @@ int main() {
 
 
 
+
         glDepthFunc(GL_LEQUAL);
         world.use();
         glBindVertexArray(worldVAO);
@@ -736,12 +691,15 @@ int main() {
 
 
 
+
+
         glDisable(GL_CULL_FACE);
         my_blending.use();
         glBindVertexArray(planeVAO);
 
         texture2D0.active(GL_TEXTURE0);
 
+        my_blending.setVec3("lightColor", lightColor);
         my_blending.setMat4("projection", projection);
         my_blending.setMat4("view", view);
         my_blending.setMat4("model", glm::mat4(1.0f));
@@ -751,19 +709,94 @@ int main() {
 
 
 
-        /*glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        model_loading.use();
+
+        model_loading.setVec3("dirLight.direction", dirLight.direction);
+        model_loading.setVec3("dirLight.ambient", dirLight.ambient);
+        model_loading.setVec3("dirLight.diffuse", dirLight.diffuse);
+        model_loading.setVec3("dirLight.specular", dirLight.specular);
+
+        model_loading.setVec3("pointLight.position", glm::vec3(5.0f * cos(time), 5.0f, 8.0f * sin(time) - 10.0f));
+        model_loading.setVec3("pointLight.ambient", pointLight.ambient);
+        model_loading.setVec3("pointLight.diffuse", pointLight.diffuse);
+        model_loading.setVec3("pointLight.specular", pointLight.specular);
+        model_loading.setFloat("pointLight.constant", pointLight.constant);
+        model_loading.setFloat("pointLight.linear", pointLight.linear);
+        model_loading.setFloat("pointLight.quadratic", pointLight.quadratic);
+
+        model_loading.setVec3("spotLight[0].position", spotLightPositions[0]);
+        model_loading.setVec3("spotLight[0].direction", spotLight.direction);
+        model_loading.setVec3("spotLight[0].ambient", spotLight.ambient);
+        model_loading.setVec3("spotLight[0].diffuse", spotLight.diffuse);
+        model_loading.setVec3("spotLight[0].specular", spotLight.specular);
+        model_loading.setFloat("spotLight[0].constant", spotLight.constant);
+        model_loading.setFloat("spotLight[0].linear", spotLight.linear);
+        model_loading.setFloat("spotLight[0].quadratic", spotLight.quadratic);
+        model_loading.setFloat("spotLight[0].cutOff", spotLight.cutOff);
+        model_loading.setFloat("spotLight[0].outerCutOff", spotLight.outerCutOff);
+
+        model_loading.setVec3("spotLight[1].position", spotLightPositions[1]);
+        model_loading.setVec3("spotLight[1].direction", spotLight.direction);
+        model_loading.setVec3("spotLight[1].ambient", spotLight.ambient);
+        model_loading.setVec3("spotLight[1].diffuse", spotLight.diffuse);
+        model_loading.setVec3("spotLight[1].specular", spotLight.specular);
+        model_loading.setFloat("spotLight[1].constant", spotLight.constant);
+        model_loading.setFloat("spotLight[1].linear", spotLight.linear);
+        model_loading.setFloat("spotLight[1].quadratic", spotLight.quadratic);
+        model_loading.setFloat("spotLight[1].cutOff", spotLight.cutOff);
+        model_loading.setFloat("spotLight[1].outerCutOff", spotLight.outerCutOff);
+
+        model_loading.setVec3("spotLight[2].position", spotLightPositions[2]);
+        model_loading.setVec3("spotLight[2].direction", spotLight.direction);
+        model_loading.setVec3("spotLight[2].ambient", spotLight.ambient);
+        model_loading.setVec3("spotLight[2].diffuse", spotLight.diffuse);
+        model_loading.setVec3("spotLight[2].specular", spotLight.specular);
+        model_loading.setFloat("spotLight[2].constant", spotLight.constant);
+        model_loading.setFloat("spotLight[2].linear", spotLight.linear);
+        model_loading.setFloat("spotLight[2].quadratic", spotLight.quadratic);
+        model_loading.setFloat("spotLight[2].cutOff", spotLight.cutOff);
+        model_loading.setFloat("spotLight[2].outerCutOff", spotLight.outerCutOff);
+
+        model_loading.setVec3("spotLight[3].position", spotLightPositions[3]);
+        model_loading.setVec3("spotLight[3].direction", spotLight.direction);
+        model_loading.setVec3("spotLight[3].ambient", spotLight.ambient);
+        model_loading.setVec3("spotLight[3].diffuse", spotLight.diffuse);
+        model_loading.setVec3("spotLight[3].specular", spotLight.specular);
+        model_loading.setFloat("spotLight[3].constant", spotLight.constant);
+        model_loading.setFloat("spotLight[3].linear", spotLight.linear);
+        model_loading.setFloat("spotLight[3].quadratic", spotLight.quadratic);
+        model_loading.setFloat("spotLight[3].cutOff", spotLight.cutOff);
+        model_loading.setFloat("spotLight[3].outerCutOff", spotLight.outerCutOff);
+
+        model_loading.setVec3("lightColor", lightColor);
+        model_loading.setVec3("viewPosition", camera.Position);
+        model_loading.setMat4("projection", projection);
+        model_loading.setMat4("view", view);
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, -0.5f, -30.0f));
+        model = glm::scale(model, glm::vec3(0.7f));
+        model_loading.setMat4("model", model);
+
+        ourModel.Draw(model_loading);
+
+
+
 
 
 
         bool horizontal = true, first_iteration = true;
-        unsigned int amount = 5;
+        unsigned int amount = 20;
         blur.use();
+        glBindVertexArray(quadVAO);
         for (unsigned int i = 0; i < amount; i++)
         {
             glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);
             blur.setInt("horizontal", horizontal);
-            glBindTexture(GL_TEXTURE_2D, first_iteration ? colorBuffer[1] : pingpongColorbuffers[!horizontal]);  // bind texture of other framebuffer (or scene if first iteration)
-            renderQuad();
+            glBindTexture(GL_TEXTURE_2D, first_iteration ? colorBuffer[1] : pingpongColorbuffers[!horizontal]);
+
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
             horizontal = !horizontal;
             if (first_iteration)
                 first_iteration = false;
@@ -773,17 +806,18 @@ int main() {
 
 
 
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         hdr_light.use();
-        glActiveTexture(GL_TEXTURE4);
+        glBindVertexArray(quadVAO);
+        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, colorBuffer[0]);
-        glActiveTexture(GL_TEXTURE5);
+        glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, pingpongColorbuffers[!horizontal]);
         hdr_light.setInt("bloom", bloom);
         hdr_light.setFloat("exposure", exposure);
-        renderQuad();
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-        //std::cout << "hdr: " << (bloom ? "on" : "off") << "| exposure: " << exposure << std::endl;*/
 
         update(window);
         glfwSwapBuffers(window);
@@ -793,10 +827,12 @@ int main() {
     glDeleteBuffers(1, &worldVBO);
     glDeleteBuffers(1, &planeVBO);
     glDeleteBuffers(1, &crystalVBO);
+    glDeleteBuffers(1, &quadVBO);
     glDeleteVertexArrays(1, &worldVAO);
     glDeleteVertexArrays(1, &planeVAO);
     glDeleteVertexArrays(1, &crystalVAO);
     glDeleteVertexArrays(1, &cubeVAO);
+    glDeleteVertexArrays(1, &quadVAO);
     world.deleteProgram();
     crystals.deleteProgram();
     my_blending.deleteProgram();
@@ -809,36 +845,6 @@ int main() {
     glfwTerminate();
     return 0;
 }
-
-
-unsigned int quadVAO = 0;
-unsigned int quadVBO;
-void renderQuad()
-{
-    if (quadVAO == 0)
-    {
-        float quadVertices[] = {
-                -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
-                -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-                1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
-                1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-        };
-        glGenVertexArrays(1, &quadVAO);
-        glGenBuffers(1, &quadVBO);
-        glBindVertexArray(quadVAO);
-        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    }
-    glBindVertexArray(quadVAO);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    glBindVertexArray(0);
-}
-
-
 
 
 
@@ -860,6 +866,7 @@ void processInput(GLFWwindow *window)
     {
         bloom = !bloom;
         bloomKeyPressed = true;
+        std::cout << "bloom: " << (bloom ? "on" : "off") << "| exposure: " << exposure << std::endl;
     }
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE)
     {
@@ -868,16 +875,22 @@ void processInput(GLFWwindow *window)
 
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
     {
-        if (exposure > 0.0f)
+        if (exposure > 0.0f) {
             exposure -= 0.05f;
-        else
+            std::cout << "bloom: " << (bloom ? "on" : "off") << "| exposure: " << exposure << std::endl;
+        }
+        else {
             exposure = 0.0f;
+            std::cout << "bloom: " << (bloom ? "on" : "off") << "| exposure: " << exposure << std::endl;
+        }
     }
     else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
     {
         exposure += 0.05f;
+        std::cout << "hdr: " << (bloom ? "on" : "off") << "| exposure: " << exposure << std::endl;
     }
 }
+
 void update(GLFWwindow *window) {
 
 }
@@ -898,6 +911,10 @@ void key_callback(GLFWwindow * window, int key, int scancode, int action, int mo
 
     if(key == GLFW_KEY_B && action == GLFW_PRESS) {
         lightColor = glm::vec3(0.0f, 0.0f, 1.0f);
+    }
+
+    if(key == GLFW_KEY_M && action == GLFW_PRESS) {
+        lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
     }
 }
 
@@ -922,19 +939,6 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     camera.ProcessMouseScroll(yoffset);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

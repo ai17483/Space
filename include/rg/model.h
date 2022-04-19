@@ -216,8 +216,8 @@ unsigned int TextureFromFile(const char *path, const string &directory, bool gam
     int width, height, nrComponents;
     unsigned char *data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
     if(data) {
-        GLenum internalFormat;
-        GLenum dataFormat;
+        GLenum internalFormat = 0;
+        GLenum dataFormat = 0;
         if(nrComponents == 1)
             internalFormat = dataFormat = GL_RED;
         else if (nrComponents == 3)

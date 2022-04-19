@@ -20,8 +20,8 @@ public:
         unsigned char* data = stbi_load(pathToImg.c_str(), &width, &height, &nChannel, 0);
 
         if(data) {
-            GLenum internalFormat;
-            GLenum dataFormat;
+            GLenum internalFormat = 0;
+            GLenum dataFormat = 0;
             if(nChannel == 1)
                 internalFormat = dataFormat = GL_RED;
             else if (nChannel == 3)
