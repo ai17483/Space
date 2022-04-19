@@ -21,3 +21,5 @@ ESC izlaz iz programa
 Oblast iz grupe A: Cubemaps
 
 Oblast iz grupe B: HDR, Bloom
+
+Snimak je prilozen zajedno sa kodom
